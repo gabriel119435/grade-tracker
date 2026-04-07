@@ -1,0 +1,49 @@
+/* login page, centers the card on the viewport via fixed positioning */
+.login-page {
+    position: fixed;
+    /* top|left put the element's top-left corner at the viewport center;
+       translate(-50%, -50%) shifts it back by half its own width and height,
+       so the element's center aligns with the viewport center */
+    top: var(--center);
+    left: var(--center);
+    transform: translate(var(--center-neg), var(--center-neg));
+}
+
+/* contained form box with shadow; login page */
+.login-card {
+    background: var(--color-surface-1);
+    border-color: var(--color-surface-3);
+    padding: var(--space-5);
+    width: var(--width-card);
+    gap: var(--space-4);
+}
+
+/* page title at the top of the login card */
+.login-card h1 {
+    font-size: var(--font-scale-1);
+}
+
+/* username and password input group */
+.login-card form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* inputs spanning the full card width */
+.login-card input {
+    width: 100%;
+    display: block; /* inputs are inline-block by default; block makes width: 100% stretch to fill */
+}
+
+/* login button spanning the full card width */
+.login-card button {
+    width: 100%;
+    margin-top: var(--space-1); /* small gap between last input and button */
+}
+
+/* error message shown below the form on failed login */
+.login-error {
+    font-size: var(--font-1);
+    color: var(--color-danger-1);
+}

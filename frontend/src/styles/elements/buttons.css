@@ -1,0 +1,102 @@
+/* base reset; removes browser default button appearance */
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: var(--border-radius-0);
+    padding: var(--space-2) var(--space-3); /* top|bottom left|right */
+    font-size: var(--font-2);
+    font-family: inherit; /* browsers don't inherit font into buttons by default */
+    transition: background var(--duration-0);
+}
+
+button:disabled {
+    opacity: var(--opacity-0);
+    cursor: not-allowed;
+}
+
+/* primary action: save, add, submit, log in */
+.btn-primary {
+    background: var(--color-action-0);
+    color: var(--color-text-0);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--color-action-1);
+}
+
+/* destructive action: delete, logout */
+/* min-width fits the longest delete-related string across all button states: common.delete and common.confirmation */
+.btn-danger,
+.btn-danger-confirm {
+    min-width: calc(8ch + 2 * var(--space-3));
+}
+
+.btn-danger {
+    background: var(--color-danger-0);
+    color: var(--color-text-0);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: var(--color-danger-1);
+}
+
+/* disabled danger buttons darken instead of fading; opacity fade blends with light surfaces and looks washed out */
+.btn-danger:disabled,
+.btn-danger-confirm:disabled {
+    opacity: 1;
+    background: var(--color-danger-1);
+}
+
+/* destructive action awaiting confirmation; first click activates, second click confirms */
+.btn-danger-confirm {
+    background: var(--color-danger-1);
+    color: var(--color-text-0);
+}
+
+.btn-danger-confirm:hover:not(:disabled) {
+    background: var(--color-danger-2);
+}
+
+/* inline group of options where exactly one is active; grade history limit selector */
+.btn-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.btn-group-label {
+    font-size: var(--font-1);
+    color: var(--color-text-2);
+}
+
+.btn-group-item {
+    background: transparent;
+    color: var(--color-text-2);
+    border: var(--border-width) solid var(--color-surface-3);
+    font-size: var(--font-1);
+    padding: var(--space-1) var(--space-2);
+}
+
+.btn-group-item:hover:not(:disabled) {
+    background: var(--color-surface-2);
+    color: var(--color-text-0);
+}
+
+.btn-group-item.active {
+    background: var(--color-surface-2);
+    color: var(--color-text-0);
+    border-color: var(--color-border-0);
+}
+
+/* less important button: hide/show grade form, toggle grade history limit */
+.btn-ghost {
+    background: transparent;
+    color: var(--color-text-2);
+    border: var(--border-width) solid var(--color-surface-3);
+    font-size: var(--font-1);
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: var(--color-surface-2);
+    color: var(--color-text-0);
+}

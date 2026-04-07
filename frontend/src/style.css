@@ -1,0 +1,33 @@
+/* all styles are global, following ITCSS (inverted triangle css); a deliberate cascade architecture.
+   vue's <style scoped> was not used because it conflicts with ITCSS
+   scoped styles break the intentional downward flow between layers.
+   class names are kept specific enough that accidental collisions are not a risk. */
+
+/* settings */
+@import './styles/settings/variables.css';
+
+/* generic */
+@import './styles/generic/reset.css';
+
+/* elements */
+@import './styles/elements/buttons.css';
+@import './styles/elements/inputs.css';
+
+/* layout */
+@import './styles/layout/structure.css';
+
+/* components */
+@import './styles/components/top-bar.css';
+@import './styles/components/toast.css';
+@import './styles/components/dropdown.css';
+@import './styles/components/user-list.css';
+@import './styles/components/grade-input.css';
+@import './styles/components/grade-charts.css';
+
+/* views */
+@import './styles/views/login.css';
+@import './styles/views/teacher-grades.css';
+@import './styles/views/categories.css';
+
+/* overrides */
+@import './styles/overrides/mobile.css';

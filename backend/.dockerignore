@@ -1,0 +1,15 @@
+# auto-generated
+__pycache__/
+.pytest_cache/
+
+# tooling
+.venv
+
+# local data
+app.db
+
+# secrets
+.env
+
+# repo files
+.gitignore

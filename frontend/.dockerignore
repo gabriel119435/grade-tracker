@@ -1,0 +1,8 @@
+# auto-generated
+dist/
+
+# tooling
+node_modules/
+
+# repo files
+.gitignore

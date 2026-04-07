@@ -1,0 +1,17 @@
+# general
+.idea
+.DS_Store
+
+# be auto-generated
+__pycache__/
+.pytest_cache/
+# be tooling
+backend/.venv
+backend/.ruff_cache/
+# be local data
+backend/app.db
+# be secrets
+.env
+
+# fe
+frontend/node_modules

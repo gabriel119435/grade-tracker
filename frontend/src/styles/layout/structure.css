@@ -1,0 +1,89 @@
+/* main vertical column that stacks all sections of every view */
+.vertical-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: center;
+}
+
+/* header row containing a title and an optional action element; used in grade form and charts */
+.grades-header {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3);
+    align-items: center;
+    width: 100%;
+}
+
+/* 'history' and 'add grades' texts */
+.grades-title {
+    font-size: var(--font-4);
+    font-weight: var(--font-weight-bold);
+    white-space: nowrap;
+}
+
+/* add teacher, add student, add category, change password */
+.single-line-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    align-items: center;
+}
+
+/* wide enough to always show 25 chars without scrolling.
+   border-box makes min-width include padding + border, so both must be added back:
+   content = min-width - 2 * horizontal padding - 2 * border = exactly 25ch */
+.single-line-form input {
+    min-width: calc(25ch + 2 * var(--space-3) + 2 * var(--border-width));
+}
+
+/* base card shell; structural properties shared by every card variant in the app */
+.list-card,
+.login-card,
+.form-card,
+.history-card,
+.category-card,
+.chart-card {
+    border: var(--border-width) solid; /* color set per variant via border-color */
+    border-radius: var(--border-radius-0);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+/* shared card shell; category management cards and student/teacher list */
+.list-card {
+    background: var(--color-surface-2);
+    border-color: var(--color-surface-3);
+    padding: var(--space-2);
+    width: var(--width-card);
+    gap: var(--space-2);
+}
+
+/* tighter horizontal gap inside cards so 25-char names + delete button fit within card width */
+.list-card .item-row {
+    gap: var(--space-1);
+}
+
+/* wrapping row of cards or items
+   category input card, sub categories input card
+   category management card, badge+chart per sub category history */
+.cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4);
+}
+
+/* admin's teacher list and teacher's student list, category management's sub cat rows
+   each row: item name on the left, delete button on the right */
+.item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* if only 2 items, pushes first item to left, last item to right */
+    gap: var(--space-3);
+    font-size: var(--font-2);
+    white-space: nowrap;
+}
+

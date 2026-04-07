@@ -1,0 +1,68 @@
+/* each subcategory column: label on top, input below */
+.subcategory-input-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* subcategory name label above the input */
+.subcategory-input-column label {
+    font-size: var(--font-scale-0);
+}
+
+/* number input wrapper with state-color feedback */
+.grade-input {
+    display: flex;
+    align-items: stretch; /* stretches the inner input to the full height of the wrapper */
+    border: var(--border-width) solid var(--color-surface-3);
+    border-radius: var(--border-radius-0);
+    background: var(--color-surface-1);
+    overflow: hidden; /* prevents input backgrounds from bleeding past the rounded corners */
+    width: var(--width-grade-input);
+}
+
+/* :focus-within triggers when any descendant has focus; ring is on the wrapper, not the raw input */
+.grade-input:focus-within {
+    border-color: var(--color-action-0);
+    box-shadow: var(--shadow);
+}
+
+/* state classes are set dynamically by the grades composable based on the value's change status */
+.grade-input.grade-cell-new {
+    background: var(--color-grade-new);
+}
+
+.grade-input.grade-cell-updating {
+    background: var(--color-grade-updating);
+}
+
+.grade-input.grade-cell-deleting {
+    background: var(--color-grade-deleting);
+}
+
+.grade-input.grade-cell-error {
+    background: var(--color-grade-error);
+    border-color: var(--color-danger-1);
+}
+
+/* inputs.css styles every <input> globally; these overrides reset that inside the wrapper:
+   no border/radius (wrapper owns them), transparent background (wrapper holds the state color) */
+.grade-input input {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    flex: 1;
+    min-width: 0; /* flex items have a default minimum size that prevents shrinking; this removes it */
+    padding: var(--space-1) 0;
+}
+
+/* keeps placeholder visible at full opacity; firefox defaults placeholder opacity to ~0.5 */
+.grade-input input::placeholder {
+    color: inherit;
+    opacity: 1;
+}
+
+/* clear the input's own focus shadow; the wrapper's :focus-within ring is used instead */
+.grade-input input:focus {
+    box-shadow: none;
+}

@@ -1,0 +1,23 @@
+/* every element on the page; resets browser defaults */
+* {
+    box-sizing: border-box; /* width and height include padding and border, not just content */
+    margin: 0; /* headers: default <h2> has margins */
+    padding: 0; /* bullet points: default <ul> has left padding */
+    user-select: none; /* prevents text selection */
+    -webkit-user-select: none; /* prevents text selection safari */
+}
+
+ul {
+    list-style: none; /* removes dots on lists */
+}
+
+body {
+    font-family: system-ui, sans-serif; /* OS native font: SF Pro on Mac, Segoe UI on Windows */
+    font-size: var(--font-2);
+    color: var(--color-text-0);
+    background: var(--color-surface-0);
+    margin: 0 auto; /* 0 top/bottom, auto left/right; centers the body horizontally */
+    padding: 0 var(--space-4) var(--space-4); /* top horizontal bottom; top is zero because topbar already has margin-bottom */
+    text-align: center; /* centers inline content: headings, labels, nav links */
+}
+

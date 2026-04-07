@@ -1,0 +1,21 @@
+/* inputs, consistent with button sizing and palette */
+input {
+    font-family: inherit;
+    font-size: var(--font-2);
+    color: var(--color-text-0);
+    background: var(--color-surface-1);
+    border: var(--border-width) solid var(--color-surface-3);
+    border-radius: var(--border-radius-0);
+    padding: var(--space-2) var(--space-3);
+    text-align: center;
+}
+
+input:focus {
+    border-color: var(--color-border-0);
+    box-shadow: var(--shadow);
+}
+
+/* inline validation error below a form, password too short, etc. */
+.field-error {
+    color: var(--color-text-error);
+}

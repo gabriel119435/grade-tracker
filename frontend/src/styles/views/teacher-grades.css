@@ -1,0 +1,56 @@
+/* student selector and toggle button centered as a group
+   flex-wrap lets the button drop to its own row when space is tight */
+.selector-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* card wrapping the entire grade input form */
+.form-card {
+    background: var(--color-surface-2);
+    border-color: var(--color-surface-3);
+    padding: var(--space-3);
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* date label and input grouped together; sits inside form-card so one step darker */
+.date-field {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    background: var(--color-surface-3);
+    border: var(--border-width) solid var(--color-surface-4);
+    border-radius: var(--border-radius-0);
+    padding: var(--space-1) var(--space-3);
+}
+
+/* "date" label to the left of the date input */
+.date-field label {
+    color: var(--color-text-2);
+    white-space: nowrap;
+}
+
+/* validation error shown below the date input; DateInput component */
+.date-input-error {
+    color: var(--color-text-error);
+    width: 100%;
+}
+
+/* card for each category and its subcategory inputs; sits inside form-card so one step darker */
+.category-block {
+    background: var(--color-surface-3);
+    border: var(--border-width) solid var(--color-surface-4);
+    border-radius: var(--border-radius-0);
+    padding: var(--space-3);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}

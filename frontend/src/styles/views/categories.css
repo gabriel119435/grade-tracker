@@ -1,0 +1,20 @@
+/* category name + delete button on one line */
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-1);
+}
+
+/* add-subcategory form inside a management card */
+.category-management form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: auto; /* pushes form to card bottom; aligns across all cards in the same row */
+}
+
+.category-management input,
+.category-management form button {
+    width: 100%;
+}

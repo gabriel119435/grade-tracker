@@ -1,0 +1,12 @@
+/* stacks username above grade count vertically, occupies left side of item-row */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+/* grade counter label, smaller and softer than the username above it */
+.user-count {
+    color: var(--color-text-2);
+    font-size: var(--font-scale-0);
+}

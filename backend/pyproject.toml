@@ -1,0 +1,18 @@
+[project]
+name = "grade-tracker-backend"
+version = "0.1.0"
+description = "flask backend for grade-tracker: teachers record student grades by date, students view their history as charts"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.1.3",
+    "flask-cors>=6.0.2",
+    "flask-login>=0.6.3",
+    "sqlalchemy>=2.0.48",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

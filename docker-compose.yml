@@ -1,0 +1,25 @@
+services:
+  flask-backend:
+    build: ./backend
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_PASS=${ADMIN_PASS}
+      - FLASK_HOST=0.0.0.0
+      # flask only accepts requests from nginx, not from the browser directly
+      - CORS_ORIGINS=http://localhost
+      # points db to the named volume directory so data persists across container restarts
+      - DATABASE_URL=sqlite:////data/app.db
+    volumes:
+      - grade-tracker-db:/data
+
+  nginx-frontend:
+    build: ./frontend
+    ports:
+      # only nginx is exposed to the host; flask is reachable only within docker's internal network
+      - "80:80"
+    depends_on:
+      - flask-backend
+
+volumes:
+  grade-tracker-db:
+    name: grade-tracker-db

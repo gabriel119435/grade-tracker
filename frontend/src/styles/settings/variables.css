@@ -1,0 +1,101 @@
+:root {
+    /* surface hierarchy: from lightest to darkest */
+    --color-surface-0: #f9f2e8;
+    --color-surface-1: #f5ede0;
+    --color-surface-2: #e8dbc8;
+    --color-surface-3: #d4c4ab;
+    --color-surface-4: #b8a088;
+
+    /* text hierarchy: from darkest to lightest */
+    --color-text-0: #3d2c1e;
+    --color-text-1: #7a5c42;
+    --color-text-2: #9a7e6a;
+    --color-text-3: #f9f2e8;
+
+    /* validation error */
+    --color-text-error: #b07848;
+
+    /* action from lightest to darkest */
+    --color-action-0: #e8845a;
+    --color-action-1: #d46e44;
+
+    /* border highlight */
+    --color-border-0: #7a5c42;
+
+    /* danger from lightest to darkest */
+    --color-danger-0: #e07878;
+    --color-danger-1: #cc5f5f;
+    --color-danger-2: #b84040;
+
+    /* toast */
+    --color-toast-positive: #7a9448;
+    --color-toast-negative: #c05840;
+
+    /* grade cell state backgrounds */
+    --color-grade-new: #e8f5ec;
+    --color-grade-updating: #fef3c2;
+    --color-grade-deleting: #fee4da;
+    --color-grade-error: #fecaca;
+
+    /* spacing scale */
+    --space-0: 2px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 40px;
+
+    /* font weights; standard numeric scale: 400 normal, 500 medium, 600 semibold, 700 bold */
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
+
+    /* font sizes: absolute */
+    --font-0: 10px;
+    --font-1: 12px;
+    --font-2: 14px;
+    --font-3: 16px;
+    --font-4: 20px;
+
+    /* font sizes, relative to parent (em)
+       em comes from typography: the width of the letter M, used as a reference unit.
+       in css it means the parent element's font-size
+       example: 0.8em on a child of a 10px parent = 8px */
+    --font-scale-0: 0.8em;
+    --font-scale-1: 1.4em;
+
+    /* border */
+    --border-width: 1px;
+    --border-radius-0: 6px;
+    --border-radius-1: 12px;
+
+    /* shadows
+       box-shadow: h-offset  v-offset  blur  spread  color
+       ─────────────────────────────────────────────────────
+       h-offset: left/right shift  (+ = right)
+       v-offset: up/down shift     (+ = down)
+       blur    : edge softness     (0 = sharp)
+       spread  : size before blur  (default 0)
+       color   : usually rgba for opacity control */
+    --shadow: 0 0 10px rgba(0, 0, 0, .1);
+
+    /* z-index stack; only relative order matters, each level must be above the previous */
+    --z-index-0: 1;
+    --z-index-1: 2;
+
+    /* transition durations: from shorter to longer */
+    --duration-0: 0.2s;
+    --duration-1: 1s;
+
+    /* opacity scale: from less to more opacity*/
+    --opacity-0: 0.5;
+    --opacity-1: 0.7;
+
+    /* fixed component widths */
+    --width-grade-input: 40px;
+    --width-chart: 300px;
+    --width-card: 360px;
+
+    /* horizontal centering pair; use together: left: var(--center) + translateX(var(--center-neg)) */
+    --center: 50%;
+    --center-neg: -50%;
+}

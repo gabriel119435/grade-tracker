@@ -1,0 +1,80 @@
+/* custom themed dropdown; replaces native <select> */
+.app-dropdown {
+    position: relative; /* any position: absolute descendants measure their position from this element */
+    display: inline-block; /* shrinks to content width like text, but still accepts a set width */
+    width: calc(25ch + 2 * var(--space-3) + var(--space-2) + 1ch); /* 25ch content + left/right padding + gap + arrow */
+}
+
+/* top bar locale picker only
+   compact variant: sized to the widest option so it never resizes on selection */
+.app-dropdown.app-select-compact {
+    width: auto;
+    min-width: max-content; /* never narrower than the widest option text */
+}
+
+/* the visible button showing the selected value, opens the list on click */
+.app-select-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    background: var(--color-surface-1);
+    border: var(--border-width) solid var(--color-surface-3);
+    border-radius: var(--border-radius-0);
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer; /* hand cursor on hover */
+    white-space: nowrap;
+}
+
+/* open is added by Vue when the list is visible; open and hovered share the same treatment */
+.app-select-trigger.open,
+.app-select-trigger:hover {
+    border-color: var(--color-border-0);
+    box-shadow: var(--shadow);
+}
+
+/* grayed text shown before an option is selected */
+.app-select-placeholder {
+    color: var(--color-text-2);
+}
+
+/* label text inside the trigger; arrow stays at far right via previous justify-content: space-between */
+.app-select-trigger span:first-child {
+    flex: 1; /* takes all remaining space, pushing the arrow to the right edge */
+    text-align: center;
+}
+
+/* the arrow icon on the right of the trigger */
+.app-select-arrow {
+    color: var(--color-text-2);
+}
+
+/* floating list of options, appears below the trigger when open */
+.app-select-dropdown {
+    /* takes no space in layout, floats over content
+       anchored to .app-dropdown (position: relative) */
+    position: absolute;
+    top: calc(100% + var(--space-1)); /* 100% = full height of trigger; + space-1 = gap below */
+    left: var(--center); /* moves left edge to parent's midpoint */
+    transform: translateX(var(--center-neg)); /* shifts back by half own width, resulting in centered */
+    min-width: max-content;
+    background: var(--color-surface-1);
+    border: var(--border-width) solid var(--color-surface-3);
+    border-radius: var(--border-radius-0);
+    box-shadow: var(--shadow);
+    z-index: var(--z-index-0);
+    overflow: hidden; /* option hover backgrounds are rectangular; this prevents them from bleeding past the rounded corners */
+}
+
+/* each individual option row in the list */
+.app-select-option {
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+}
+
+/* hovered and currently selected option share the same highlight */
+.app-select-option:hover,
+.app-select-option.active {
+    background: var(--color-surface-2);
+}

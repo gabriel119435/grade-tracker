@@ -1,0 +1,72 @@
+/* all layouts: admin, teacher, student
+   full-width bar at the top of every page with 3 columns: username | nav tabs | locale+logout */
+nav {
+    display: grid;
+    /* 1fr auto 1fr: the two outer columns take equal shares of remaining space after the center
+       is sized to content; this forces the center column to be truly centered on the page
+       regardless of how wide the username or the right-side controls may be */
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    background: var(--color-surface-1);
+    border-bottom: var(--border-width) solid var(--color-surface-3);
+    padding: var(--space-2) var(--space-4);
+    /* top left/right bottom
+    top: starts at the very top of page
+    left/right: pulls the bar outward to cancel body's padding
+    bottom: creates gap between bar and content below
+    negative horizontal margin cancels body's padding so the bar bleeds edge-to-edge */
+    margin: 0 calc(-1 * var(--space-4)) var(--space-4);
+    text-align: left; /* overrides body text-align: center */
+}
+
+/* the row of navigation tab links: categories, students, grades */
+.top-bar-links {
+    display: flex;
+    gap: var(--space-1);
+}
+
+/* each individual tab link */
+.top-bar-links a {
+    text-decoration: none; /* removes the underline browsers apply to <a> tags by default */
+    color: var(--color-text-2);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--border-radius-0);
+}
+
+/* hovered tab and currently active tab share the same visual treatment
+   router-link-exact-active is added by Vue Router to the active tab's <a> when its route matches exactly */
+.top-bar-links a:hover,
+.top-bar-links a.router-link-exact-active {
+    background: var(--color-surface-2);
+    color: var(--color-text-0);
+}
+
+.top-bar-links a.router-link-exact-active {
+    font-weight: var(--font-weight-medium);
+}
+
+/* center grid column that holds the nav tabs slot */
+.top-bar-center {
+    display: flex;
+    justify-content: center;
+}
+
+/* right grid column holding the locale dropdown and logout button */
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    justify-self: end; /* only for this component, push to far right of the 1fr column */
+    gap: var(--space-2);
+}
+
+/* the logged-in username displayed as a pill on the left */
+.top-bar-left {
+    /* don't stretch across the full 1fr column
+       mirror of justify-self: end on .top-bar-right */
+    justify-self: start;
+    color: var(--color-text-2);
+    border: var(--border-width) solid var(--color-surface-3);
+    border-radius: var(--border-radius-0);
+    padding: var(--space-2) var(--space-3);
+    white-space: nowrap;
+}

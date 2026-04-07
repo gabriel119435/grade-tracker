@@ -1,0 +1,80 @@
+/* large outer card holding all grade history charts
+   one step darker than page background to visually separate from page */
+.history-card {
+    background: var(--color-surface-2);
+    border-color: var(--color-surface-3);
+    padding: var(--space-3);
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+}
+
+/* vertical stack of all category cards inside the history card */
+.categories-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* category name bar that collapses or expands its charts on click */
+.category-title {
+    display: inline-flex; /* like inline-block but for flex containers: shrinks to content width */
+    flex-direction: column;
+    align-items: center;
+    background: var(--color-surface-4);
+    border: var(--border-width) solid var(--color-surface-4); /* matches background so it's invisible at rest; prevents layout shift when hover changes border-color */
+    border-radius: var(--border-radius-0);
+    padding: var(--space-1) var(--space-3);
+    cursor: pointer;
+    font-size: var(--font-3);
+    color: var(--color-text-1);
+}
+
+/* average score line shown below the category name */
+.category-avg {
+    font-size: var(--font-0);
+}
+
+.category-title:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-border-0);
+}
+
+/* card grouping all subcategory charts for one category */
+.category-card {
+    background: var(--color-surface-3);
+    border-color: var(--color-surface-4);
+    padding: var(--space-3);
+    width: fit-content; /* shrinks to content width; works because chart-card has a fixed width */
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* card wrapping one subcategory chart and its label */
+.chart-card {
+    background: var(--color-surface-1);
+    border-color: var(--color-surface-3);
+    padding: var(--space-2);
+    width: var(--width-chart); /* fixed so chart.js has a defined container to render into */
+    align-items: center;
+    gap: var(--space-1);
+}
+
+/* pill label showing the subcategory name above the chart */
+.subcat-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: var(--font-0);
+    color: var(--color-text-2);
+    background: var(--color-surface-2);
+    border: var(--border-width) solid var(--color-surface-3);
+    border-radius: var(--border-radius-1);
+    padding: var(--space-0) var(--space-2);
+}
+
+/* most recent grade shown below the subcategory name inside the badge; dimmed to de-emphasize */
+.subcat-latest {
+    opacity: var(--opacity-1);
+}
