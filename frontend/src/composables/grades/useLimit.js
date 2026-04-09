@@ -8,9 +8,6 @@ export function useLimit(onChange) {
 
     async function setLimit(value) {
         limit.value = value
-        // js does not enforce function signatures: onChange(value) always passes the new integer,
-        // but the callback can declare zero parameters and silently ignore it (student view: load())
-        // or declare a parameter and use it (teacher view: (newLimit) => loadStudentGrades(..., newLimit))
         await onChange(value)
     }
 

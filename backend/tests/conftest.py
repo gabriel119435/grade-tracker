@@ -1,5 +1,7 @@
 import os
 
+from sqlalchemy import delete
+
 # must be set before any app import so db.py picks it up at module load time
 os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
 
@@ -58,7 +60,7 @@ def grade_context(app):
     yield ids
 
     with get_session(write=True) as session:
-        session.query(Grade).delete()
-        session.query(Subcategory).delete()
-        session.query(Category).delete()
-        session.query(User).filter(User.username != 'admin').delete()
+        session.execute(delete(Grade))
+        session.execute(delete(Subcategory))
+        session.execute(delete(Category))
+        session.execute(delete(User).where(User.username != 'admin'))

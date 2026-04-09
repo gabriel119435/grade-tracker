@@ -41,8 +41,6 @@ def create_user(role, data):
         abort(409, "username_exists")
 
 
-
-
 def delete_user(user_id, role):
     # role is trusted, caller must guard with @require_role before reaching here
     with get_session(write=True) as session:

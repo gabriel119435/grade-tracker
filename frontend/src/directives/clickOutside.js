@@ -2,7 +2,7 @@ const handlers = new Map()
 
 document.addEventListener('click', (e) => {
     handlers.forEach((handler, domElement) => {
-        // calls handler is click is outside domElement
+        // calls handler if click is outside domElement
         if (!domElement.contains(e.target)) handler()
     })
 })
