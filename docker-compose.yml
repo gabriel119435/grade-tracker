@@ -15,6 +15,13 @@ services:
     memswap_limit: 256m
     cpus: 0.5 # can't starve the host scheduler
     pids_limit: 100 # blocks fork bombs
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx-frontend:
     build:
@@ -28,6 +35,13 @@ services:
     memswap_limit: 64m
     cpus: 0.25
     pids_limit: 50
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   grade-tracker-db:
