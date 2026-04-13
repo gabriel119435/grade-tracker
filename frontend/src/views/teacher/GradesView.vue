@@ -30,7 +30,7 @@ const {
   validateGradeInput,
   cellStates
 } = useGrades(categories, () => t('grade_input.decimal_separator')) // getSeparator() is called at use time so locale changes mid-session are picked up
-const {limit, setLimit} = useLimit((newLimit) => loadStudentGrades(selectedStudentId.value, false, newLimit))
+const {limit, setLimit} = useLimit()
 const hasGradeErrors = computed(() => Object.values(inputGradeErrors.value).some(Boolean))
 const hasChanges = computed(() => Object.values(cellStates.value).some(s => s && s !== 'grade-cell-error'))
 const hasGrades = computed(() => apiResponseGrades.value.some(
@@ -45,10 +45,15 @@ onMounted(async () => {
 
 watch(selectedStudentId, async (id) => {
   if (id) {
-    limit.value = LIMITS[0]
-    await loadStudentGrades(id, true, limit.value)
+    setLimit(LIMITS[0])
+    await loadStudentGrades(id, true, LIMITS[0])
   }
 })
+
+async function handleSetLimit(value) {
+  setLimit(value)
+  await loadStudentGrades(selectedStudentId.value, false, value)
+}
 
 async function handleSubmit() {
   await withLoading(async () => {
@@ -101,7 +106,7 @@ async function handleSubmit() {
 
       <GradeCharts :grades="apiResponseGrades">
         <template v-if="hasGrades" #controls>
-          <GradeLimitControls :limit="limit" @set="setLimit"/>
+          <GradeLimitControls :limit="limit" @set="handleSetLimit"/>
         </template>
       </GradeCharts>
     </div>

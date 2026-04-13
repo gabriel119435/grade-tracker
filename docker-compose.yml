@@ -1,6 +1,8 @@
 services:
   flask-backend:
-    build: ./backend
+    build:
+      context: ./backend
+      target: runtime
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - ADMIN_PASS=${ADMIN_PASS}
@@ -11,14 +13,23 @@ services:
       - DATABASE_URL=sqlite:////data/app.db
     volumes:
       - grade-tracker-db:/data
+    mem_limit: 256m      # oom-killed before os runs out; no swap
+    memswap_limit: 256m
+    cpus: 0.5            # can't starve the host scheduler
+    pids_limit: 100      # blocks fork bombs
 
   nginx-frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: runtime
     ports:
-      # only nginx is exposed to the host; flask is reachable only within docker's internal network
-      - "80:80"
+      - "80:80"          # only nginx exposed; flask is internal
     depends_on:
       - flask-backend
+    mem_limit: 64m       # same guarantees, lighter limits
+    memswap_limit: 64m
+    cpus: 0.25
+    pids_limit: 50
 
 volumes:
   grade-tracker-db:

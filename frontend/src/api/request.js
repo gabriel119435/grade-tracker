@@ -15,7 +15,7 @@ export async function request(url, options = {}) {
 
     if (res.status === 401 && url !== '/api/login') {
         await router.push('/login')
-        return {}
+        return {error: 'unauthorized'}
     }
     if (!res.ok) {
         const text = await res.text()

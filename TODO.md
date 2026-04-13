@@ -1,7 +1,5 @@
 # current tasks
 
-- currently none
-
 # future tasks
 
 - missing tests: backend has no coverage for auth, categories, students, and teachers routes

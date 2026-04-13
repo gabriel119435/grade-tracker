@@ -3,15 +3,15 @@
 populates the db with test users, categories, and grades.
 
 teachers : t12345678-1 ... t12345678-10  (pass = username)
-           9000...0  (9 + 24 zeros)      (pass = username)
+           MAX_LEN_STR: 9000...0         (pass = username)
 students : s12345678-1 ... s12345678-10  (pass = username)
-           0000...9  (24 zeros + 9)      (pass = username)
+           MAX_LEN_STR: 0000...9         (pass = username)
 categories:
-  - "0"*25  -> 11 subcats: "0"*25, cat1 ... cat10
+  - MAX_LEN_STR ("0"*25) -> 11 subcats: MAX_LEN_STR, cat1 ... cat10
   - cat1 ... cat10 → random 0–10 subcats each (guaranteed: ≥2 cats with 10 subcats, ≥2 cats with 0 subcats)
-grades (teacher 9000...0):
-  - students: 000...09 + 2 random numbered students
-  - categories: "0"*25 + 2 random other cats that have subcats
+grades (teacher MAX_LEN_STR):
+  - students: MAX_LEN_STR + 2 random numbered students
+  - categories: MAX_LEN_STR + 2 random other cats that have subcats
   - per (student, category): 365 grades on random dates from the last 730 days,
     one grade per subcategory per date
 
@@ -33,7 +33,7 @@ from werkzeug.security import generate_password_hash
 from app.db import get_session
 from app.models import Category, Grade, Subcategory, User
 
-ZEROS = "0" * 25
+MAX_LEN_STR = "0" * 25  # 25 chars: hits the maximum allowed name/username length
 
 
 def _abort_if_db_not_empty():
@@ -78,14 +78,14 @@ def _create_students(session):
     return numbered, special
 
 
-def _create_category_zeros(session):
-    cat = Category(name=ZEROS)
+def _create_max_len_category(session):
+    cat = Category(name=MAX_LEN_STR)
     session.add(cat)
     session.flush()
 
     subcats = []
     # ["0...0", "cat1", "cat2", ..., "cat10"]
-    for name in [ZEROS] + [f"cat{i}" for i in range(1, 11)]:
+    for name in [MAX_LEN_STR] + [f"cat{i}" for i in range(1, 11)]:
         sub = Subcategory(name=name, category_id=cat.id)
         session.add(sub)
         subcats.append(sub)
@@ -161,22 +161,22 @@ def _insert_grades(session, teacher_id, student_ids, grade_cats):
 _abort_if_db_not_empty()
 
 with get_session(write=True) as session:
-    _numbered_teachers, t_special = _create_teachers(session)
-    numbered_students, s_special = _create_students(session)
+    _numbered_teachers, boundary_teacher = _create_teachers(session)
+    numbered_students, boundary_student = _create_students(session)
     session.flush() # pushes pending sql to db within the current transaction, assigns auto-generated ids during flush
 
-    cat_zeros, cat_zeros_subcat_ids = _create_category_zeros(session)
+    max_len_cat, max_len_subcat_ids = _create_max_len_category(session)
 
     # simple array of ints, showing how much subcats each cat has
     subcats_per_cat = _generate_subcat_counts()
     # returns a list of tuples, where each tuple is (Category, list[int])
     other_cats = _create_other_categories(session, subcats_per_cat)
 
-    grade_students = [s_special] + random.sample(numbered_students, 2)
-    grade_cats = [(cat_zeros, cat_zeros_subcat_ids)] + random.sample(
+    grade_students = [boundary_student] + random.sample(numbered_students, 2)
+    grade_cats = [(max_len_cat, max_len_subcat_ids)] + random.sample(
         [(cat, sub_cat_ids) for cat, sub_cat_ids in other_cats if sub_cat_ids], 2
     )
 
-    inserted = _insert_grades(session, t_special.id, [s.id for s in grade_students], grade_cats)
+    inserted = _insert_grades(session, boundary_teacher.id, [s.id for s in grade_students], grade_cats)
 
 print(f"{inserted} grades inserted")
