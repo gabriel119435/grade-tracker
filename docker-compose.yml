@@ -2,31 +2,29 @@ services:
   flask-backend:
     build:
       context: ./backend
-      target: runtime
+      target: b-runtime
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - ADMIN_PASS=${ADMIN_PASS}
       - FLASK_HOST=0.0.0.0
-      # flask only accepts requests from nginx, not from the browser directly
-      - CORS_ORIGINS=http://localhost
-      # points db to the named volume directory so data persists across container restarts
-      - DATABASE_URL=sqlite:////data/app.db
+      - CORS_ORIGINS=http://localhost # flask only accepts requests from nginx, not from the browser directly
+      - DATABASE_URL=sqlite:////data/app.db # points db to the named volume directory so data persists across container restarts
     volumes:
       - grade-tracker-db:/data
-    mem_limit: 256m      # oom-killed before os runs out; no swap
+    mem_limit: 256m # oom-killed before os runs out; no swap
     memswap_limit: 256m
-    cpus: 0.5            # can't starve the host scheduler
-    pids_limit: 100      # blocks fork bombs
+    cpus: 0.5 # can't starve the host scheduler
+    pids_limit: 100 # blocks fork bombs
 
   nginx-frontend:
     build:
       context: ./frontend
-      target: runtime
+      target: f-runtime
     ports:
-      - "80:80"          # only nginx exposed; flask is internal
+      - "80:80" # only nginx exposed; flask is internal
     depends_on:
       - flask-backend
-    mem_limit: 64m       # same guarantees, lighter limits
+    mem_limit: 64m
     memswap_limit: 64m
     cpus: 0.25
     pids_limit: 50
