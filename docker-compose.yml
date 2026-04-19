@@ -1,5 +1,6 @@
 services:
   flask-backend:
+    restart: unless-stopped
     build:
       context: ./backend
       target: b-runtime
@@ -24,6 +25,7 @@ services:
         max-file: "3"
 
   nginx-frontend:
+    restart: unless-stopped
     build:
       context: ./frontend
       target: f-runtime
