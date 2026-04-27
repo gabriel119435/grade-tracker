@@ -2,6 +2,8 @@
 
 track student grades across categories and subcategories, with per-subcategory line charts
 
+![teacher grades view](teacher-grades-view.png)
+
 ## stack
 
 - **backend**: python, flask, sqlalchemy, sqlite; pytest for tests
