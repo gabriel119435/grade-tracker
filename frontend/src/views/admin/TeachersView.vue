@@ -3,6 +3,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {changeAdminPassword} from '../../api/routes/auth.js'
 import {createTeacher, deleteTeacher, getTeachers} from '../../api/routes/teachers.js'
+import {seedDatabase} from '../../api/routes/seed.js'
 import {useLoading} from '../../composables/generic/useLoading.js'
 import {useToast} from '../../composables/generic/useToast.js'
 import {useConfirm} from '../../composables/generic/useConfirm.js'
@@ -65,6 +66,19 @@ async function handleChangePassword() {
     }
   })
 }
+
+async function handleSeed() {
+  if (!confirm('seed')) return
+  await withLoading(async () => {
+    const data = await seedDatabase()
+    if (data.error) {
+      toast(translateError(data.error), 'error')
+    } else {
+      toast(t('teachers.seed_done', data))
+      await load()
+    }
+  })
+}
 </script>
 
 <template>
@@ -97,5 +111,9 @@ async function handleChangePassword() {
              type="password"/>
       <button :disabled="loading" class="btn-primary" type="submit">{{ t('teachers.change_password') }}</button>
     </form>
+
+    <button :disabled="loading" :class="pendingId === 'seed' ? 'btn-danger-confirm' : 'btn-danger'" @click="handleSeed">
+      {{ pendingId === 'seed' ? t('common.confirmation') : t('teachers.seed') }}
+    </button>
   </div>
 </template>

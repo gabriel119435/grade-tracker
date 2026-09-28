@@ -33,6 +33,8 @@ export default {
         new_password: 'nova senha 8+ caracteres',
         change_password: 'alterar senha',
         password_changed: 'senha alterada',
+        seed: 'criar dados',
+        seed_done: 'professores: {teachers}, alunos: {students}, categorias: {categories}, subcategorias: {subcategories}, notas: {grades}',
     },
     categories: {
         new_category: 'nova categoria',

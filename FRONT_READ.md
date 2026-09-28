@@ -23,6 +23,7 @@ each new file builds on what came before; read them in order for the most cohere
         - `api/routes/teachers.js`: get, create, and delete teachers
         - `api/routes/categories.js`: get, create, and delete categories and subcategories
         - `api/routes/grades.js`: save grades (upsert + delete in one call) and get a student's grade history
+        - `api/routes/seed.js`: wipe the database except admin and fill it with test data
     - **composables**: reusable reactive logic; each file owns one self-contained concern
         - `composables/generic/useLoading.js`: tracks in-flight async state; prevents double-submission
         - `composables/generic/useToast.js`: app-wide notification: one shared message, auto-dismissed after 4 seconds
@@ -86,7 +87,7 @@ each new file builds on what came before; read them in order for the most cohere
             - `views/BaseLayout.vue`: shared layout for admin and student; wraps the top bar, page content, and toast
             - `views/TabLayout.vue`: same as BaseLayout but passes tab links into the top bar slot
         - **admin**
-            - `views/admin/TeachersView.vue`: create and delete teachers and change the admin password
+            - `views/admin/TeachersView.vue`: create and delete teachers, change the admin password, and seed db
         - **student**
             - `views/student/GradesView.vue`: student's read-only grade history as charts
         - **teacher**

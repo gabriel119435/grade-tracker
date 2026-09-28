@@ -12,6 +12,7 @@ from app.models import User, AuthUser
 from app.routes.auth import auth_bp
 from app.routes.categories import categories_bp
 from app.routes.grades import grades_bp
+from app.routes.seed import seed_bp
 from app.routes.students import students_bp
 from app.routes.teachers import teachers_bp
 
@@ -116,3 +117,4 @@ def _register_blueprints(app):
     app.register_blueprint(students_bp)
     app.register_blueprint(categories_bp)
     app.register_blueprint(grades_bp)
+    app.register_blueprint(seed_bp)

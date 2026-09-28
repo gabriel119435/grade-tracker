@@ -20,8 +20,7 @@ each new file builds on what came before; read them in order for the most cohere
     - `routes/students.py`: list, create, and delete student accounts; teacher only
     - `routes/categories.py`: manage categories and their subcategories; teacher only
     - `routes/grades.py`: save grades (upsert + delete in one request) and fetch a student's grade history
+    - `routes/seed.py`: wipes the database except the admin user and fills it with beach tennis data
 - **tests**: lives under `backend/tests/`, mirroring the `app/` structure
     - `tests/conftest.py`: pytest fixtures: creates the flask test client and some data for tests
     - `tests/routes/test_grades.py`: grade endpoint tests: upsert, update, delete, and ownership/validation rejections
-- **dev tools**
-    - `seed.py`: populates an empty database with test users, categories, subcategories, and a year of grades

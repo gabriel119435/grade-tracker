@@ -71,14 +71,6 @@ cd backend && uv run pytest
 cd frontend && npm test
 ```
 
-## dev tools
-
-seed the database with test users, categories, and a year of grades:
-
-```bash
-cd backend && uv run python seed.py
-```
-
 ## codebase guides
 
 - [BACK_READ.md](BACK_READ.md), [FRONT_READ.md](FRONT_READ.md) and [INFRA_READ.md](INFRA_READ.md): beginner-friendly
