@@ -1,11 +1,12 @@
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, jsonify, abort
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.db import get_session
 from app.models import Category, Subcategory
-from app.routes.helpers.annotations import require_role
+from app.routes.helpers.decorators import require_role
+from app.routes.helpers.payload import get_body, get_int, get_str
 
 categories_bp = Blueprint("categories", __name__)
 
@@ -38,8 +39,8 @@ def get_categories():
 @categories_bp.route("/api/categories", methods=["POST"])
 @require_role("teacher")
 def create_category():
-    data = request.get_json() or {}
-    name = data.get("name", "").strip()
+    data = get_body()
+    name = get_str(data, "name", "").strip()
     if not name:
         abort(400, "name_required")
 
@@ -69,9 +70,9 @@ def delete_category(category_id):
 @categories_bp.route("/api/subcategories", methods=["POST"])
 @require_role("teacher")
 def create_subcategory():
-    data = request.get_json() or {}
-    name = data.get("name", "").strip()
-    category_id = data.get("category_id")
+    data = get_body()
+    name = get_str(data, "name", "").strip()
+    category_id = get_int(data, "category_id")
     if not name or not category_id:
         abort(400, "name_and_category_required")
 
@@ -80,7 +81,7 @@ def create_subcategory():
 
     try:
         with get_session(write=True) as session:
-            session.add(Subcategory(name=name, category_id=int(category_id)))
+            session.add(Subcategory(name=name, category_id=category_id))
         return jsonify({"message": "created"}), 201
     except IntegrityError:
         abort(409, "subcategory_exists")

@@ -67,7 +67,6 @@
 
     .app-toast {
         font-size: var(--font-2);
-        white-space: normal; /* allow wrapping instead of overflowing viewport */
         word-break: keep-all; /* only break at spaces, never mid-word or at hyphens */
         overflow-wrap: break-word; /* fallback: break a word only if it has no spaces and would overflow */
         max-width: calc(100vw - var(--space-3) * 2); /* vw = viewport width unit: 100vw = full screen width regardless of body padding; subtracts 16px on each side for breathing room */

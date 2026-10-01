@@ -10,15 +10,15 @@ const dateError = ref(null)
 defineProps({
   categories: Array,            // [{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}]
   inputGradeDate: String,       // iso date string: '2024-01-31'
-  inputGradeEdits: Object,      // subcategory id -> current input string: {3: '7.5', 4: ''}
+  inputGradeEdits: Object,      // subcategory id -> cell text exactly as shown: {3: '7,5', 4: ''}
   cellStates: Object,           // subcategory id -> css state class: {3: 'grade-cell-new', 4: null}
-  validateGradeInput: Function, // called on every keystroke to recompute cellStates and hasGradeErrors
   loading: Boolean,             // true while save is in flight; disables submit
   hasGradeErrors: Boolean,      // true if any input is non-empty and invalid; disables submit
   hasChanges: Boolean,          // true if any input differs from last saved value; disables submit when false
 })
 
-const emit = defineEmits(['update:inputGradeDate', 'submit'])
+// edit: (subcategoryId, text) a box changed; the page owns inputGradeEdits and writes it
+const emit = defineEmits(['update:inputGradeDate', 'submit', 'edit'])
 </script>
 
 <template>
@@ -43,9 +43,9 @@ const emit = defineEmits(['update:inputGradeDate', 'submit'])
           <div v-for="sub in cat.subcategories" :key="sub.id" class="subcategory-input-column">
             <label>{{ sub.name }}</label>
             <GradeInput
-                v-model="inputGradeEdits[sub.id]"
+                :modelValue="inputGradeEdits[sub.id]"
+                @update:modelValue="emit('edit', sub.id, $event)"
                 :state="cellStates[sub.id]"
-                @update:modelValue="validateGradeInput(sub.id)"
             />
           </div>
         </div>

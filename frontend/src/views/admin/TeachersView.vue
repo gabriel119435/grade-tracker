@@ -9,6 +9,7 @@ import {useToast} from '../../composables/generic/useToast.js'
 import {useConfirm} from '../../composables/generic/useConfirm.js'
 import {translateError} from '../../utils/translateError.js'
 import {hasLeadingOrTrailingSpaces, isTooShort} from '../../utils/credentialValidation.js'
+import {PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../../utils/limits.js'
 
 const {t} = useI18n()
 const teachers = ref([]) // [{id: 1, username: 'alice', grade_count: 42}]
@@ -84,8 +85,8 @@ async function handleSeed() {
 <template>
   <div class="vertical-stack">
     <form class="single-line-form" @submit.prevent="handleCreateTeacher">
-      <input v-model="teacherUsername" :placeholder="t('common.username')" maxlength="25" required/>
-      <input v-model="teacherPassword" :placeholder="t('common.password')" maxlength="25" required/>
+      <input v-model="teacherUsername" :placeholder="t('common.username')" :maxlength="USERNAME_MAX_LENGTH" required/>
+      <input v-model="teacherPassword" :placeholder="t('common.password')" :maxlength="PASSWORD_MAX_LENGTH" required/>
       <button :disabled="loading || teacherUsernameError || teacherPasswordError" class="btn-primary" type="submit">
         {{ t('teachers.create') }}
       </button>
@@ -106,8 +107,8 @@ async function handleSeed() {
     </div>
 
     <form class="single-line-form" @submit.prevent="handleChangePassword">
-      <input v-model="adminOldPassword" :placeholder="t('teachers.current_password')" maxlength="25" required type="password"/>
-      <input v-model="adminNewPassword" :placeholder="t('teachers.new_password')" maxlength="25" required
+      <input v-model="adminOldPassword" :placeholder="t('teachers.current_password')" :maxlength="PASSWORD_MAX_LENGTH" required type="password"/>
+      <input v-model="adminNewPassword" :placeholder="t('teachers.new_password')" :maxlength="PASSWORD_MAX_LENGTH" required
              type="password"/>
       <button :disabled="loading" class="btn-primary" type="submit">{{ t('teachers.change_password') }}</button>
     </form>

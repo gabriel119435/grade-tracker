@@ -5,10 +5,10 @@ services:
       context: ./backend
       target: b-runtime
     environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - ADMIN_PASS=${ADMIN_PASS}
+      - SECRET_KEY=${SECRET_KEY:-} # :- defaults to empty when unset, without compose warning
+      - ADMIN_PASS=${ADMIN_PASS:-}
       - FLASK_HOST=0.0.0.0
-      - CORS_ORIGINS=http://localhost # flask only accepts requests from nginx, not from the browser directly
+      - FLASK_DEBUG=0 # no reloader process, no debugger stack trace pages
       - DATABASE_URL=sqlite:////data/app.db # points db to the named volume directory so data persists across container restarts
     volumes:
       - grade-tracker-db:/data

@@ -12,6 +12,7 @@ import {useLoading} from '../../composables/generic/useLoading.js'
 import {useToast} from '../../composables/generic/useToast.js'
 import {useConfirm} from '../../composables/generic/useConfirm.js'
 import {translateError} from '../../utils/translateError.js'
+import {NAME_MAX_LENGTH} from '../../utils/limits.js'
 
 const categories = ref([]) // [{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}]
 const newCategoryName = ref('') // bound to the new category input: 'forehand'
@@ -81,7 +82,7 @@ async function handleDeleteSubcategory(id) {
 <template>
   <div class="vertical-stack">
     <form class="single-line-form" @submit.prevent="handleCreateCategory">
-      <input v-model.trim="newCategoryName" :placeholder="t('categories.new_category')" maxlength="25" required/>
+      <input v-model.trim="newCategoryName" :placeholder="t('categories.new_category')" :maxlength="NAME_MAX_LENGTH" required/>
       <button :disabled="loading" class="btn-primary" type="submit">{{ t('categories.add_category') }}</button>
     </form>
 
@@ -105,7 +106,7 @@ async function handleDeleteSubcategory(id) {
 
         <form @submit.prevent="handleCreateSubcategory(cat.id)">
           <input v-model.trim="newSubcategoryNames[cat.id]" :placeholder="t('categories.new_subcategory')"
-                 maxlength="25" required/>
+                 :maxlength="NAME_MAX_LENGTH" required/>
           <button :disabled="loading" class="btn-primary" type="submit">{{ t('categories.add_subcategory') }}</button>
         </form>
       </div>

@@ -10,7 +10,7 @@
     font-size: var(--font-scale-0);
 }
 
-/* number input wrapper with state-color feedback */
+/* grade input wrapper with state-color feedback */
 .grade-input {
     display: flex;
     align-items: stretch; /* stretches the inner input to the full height of the wrapper */

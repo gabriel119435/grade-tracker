@@ -25,9 +25,8 @@ const categoryAverages = computed(() => {
 })
 
 function toggleCategory(name) {
-  const s = new Set(collapsedCategories.value)
-  s.has(name) ? s.delete(name) : s.add(name)
-  collapsedCategories.value = s
+  const collapsed = collapsedCategories.value
+  collapsed.has(name) ? collapsed.delete(name) : collapsed.add(name)
 }
 </script>
 

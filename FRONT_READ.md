@@ -10,14 +10,16 @@ each new file builds on what came before; read them in order for the most cohere
 - **base**: the foundational files that wire the whole app together
     - **scaffold**
         - `main.js`: creates and mounts the vue app; registers the router, i18n, and global directives
-        - `App.vue`: root component; a single `<RouterView/>` with no logic
-        - `store.js`: global session state: current user, role, and available locales
+        - `App.vue`: root component; a single `<RouterView/>`, and sets the page title from the current language
+        - `store.js`: global session state: current user (with role), whether the session check finished, and available
+          locales
         - `i18n.js`: vue-i18n setup; the `t()` function all components use for english and portuguese translations
         - `locales/en.js`: all english translation strings
         - `locales/pt-br.js`: portuguese translation strings; same keys as en.js
         - `router/index.js`: all app routes and the auth guard that enforces role-based access on every navigation
     - **api**: one thin file per backend resource, all built on top of `request.js`
-        - `api/request.js`: the single http function all api calls go through; normalizes failure responses
+        - `api/request.js`: the single http function all api calls go through; normalizes failure responses; on 401
+          forgets the user and goes to login
         - `api/routes/auth.js`: login, logout, locale change, admin password, and session check
         - `api/routes/students.js`: get, create, and delete students
         - `api/routes/teachers.js`: get, create, and delete teachers
@@ -58,10 +60,12 @@ each new file builds on what came before; read them in order for the most cohere
         - `styles/overrides/mobile.css`: responsive adjustments for narrow screens
 - **vue**: components split by kind; shared components are read before the views that depend on them
     - **utils**
-        - `utils/dateUtils.js`: date parsing, validation, and conversion between ISO and locale display format
-        - `utils/gradeUtils.js`: grade normalization, localization, truncating, validation, and classification helpers
+        - `utils/dateUtils.js`: date parsing, validation, conversion between ISO and locale display format, and today's
+          local date
+        - `utils/gradeUtils.js`: strict grade parsing, localization, index building, and edit classification
         - `utils/translateError.js`: maps a backend error code to the current locale string
         - `utils/credentialValidation.js`: username and password input validation helpers
+        - `utils/limits.js`: input length rules shared by the views; same rules as the backend
     - **components**
         - `components/AppToast.vue`: renders the useToast message with a fade transition
         - `components/AppTopBar.vue`: the nav bar shown on every page; accepts a slot for tab links
@@ -73,9 +77,9 @@ each new file builds on what came before; read them in order for the most cohere
     - **composables**
         - `composables/grades/useLimit.js`: the selected grade history count and the predefined limit options
         - `composables/grades/useGradesLoader.js`: shared grade fetch with built-in error handling; used by both grade
-          views
-        - `composables/grades/useGrades.js`: all grade state: loads grades, prefills input, compute cell states, and
-          builds the save payload
+          views; ignores stale answers when a newer load started
+        - `composables/grades/useGrades.js`: all grade state: loads grades, prefills inputs, computes cell states,
+          converts cells on a language switch, and builds the save payload
     - **charts**
         - `components/GradeChart.vue`: a single chart.js line chart for one subcategory
         - `components/GradeCharts.vue`: all category and subcategory charts with collapsible categories; accepts a
@@ -96,7 +100,7 @@ each new file builds on what came before; read them in order for the most cohere
             - `views/teacher/GradesView.vue`: the most complex view; student selector, grade form, charts, and limit
               controls
 - **tests**: colocated next to the source file as `<filename>.test.js`
-    - `utils/gradeUtils.test.js`: grade normalization, truncating, validation, index building, and edit classification
-    - `utils/dateUtils.test.js`: date localization and validation across formats
+    - `utils/gradeUtils.test.js`: grade parsing, localization, index building, and edit classification
+    - `utils/dateUtils.test.js`: date localization and validation across formats, and today's local date
     - `utils/credentialValidation.test.js`: username and password validation helpers
     - `router/index.test.js`: auth guard: session loading, role redirects, and access control

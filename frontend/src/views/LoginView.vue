@@ -7,6 +7,7 @@ import {store} from '../store.js'
 import {i18n} from '../i18n.js'
 import {useLoading} from '../composables/generic/useLoading.js'
 import {translateError} from '../utils/translateError.js'
+import {PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../utils/limits.js'
 
 const router = useRouter()
 const {t} = useI18n()
@@ -34,8 +35,8 @@ async function handleSubmit() {
   <div class="login-page login-card">
     <h1>{{ t('login.title') }}</h1>
     <form @submit.prevent="handleSubmit">
-      <input v-model="username" :placeholder="t('login.username')" maxlength="25" required type="text"/>
-      <input v-model="password" :placeholder="t('login.password')" maxlength="25" required type="password"/>
+      <input v-model="username" :placeholder="t('login.username')" :maxlength="USERNAME_MAX_LENGTH" required type="text"/>
+      <input v-model="password" :placeholder="t('login.password')" :maxlength="PASSWORD_MAX_LENGTH" required type="password"/>
       <button :disabled="loading" class="btn-primary" type="submit">{{ t('login.submit') }}</button>
       <p v-if="error" class="login-error">{{ error }}</p>
     </form>

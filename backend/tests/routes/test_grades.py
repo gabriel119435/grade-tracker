@@ -1,5 +1,6 @@
 def login(client, username, password):
-    client.post('/api/login', json={'username': username, 'password': password})
+    res = client.post('/api/login', json={'username': username, 'password': password})
+    assert res.status_code == 200, f'login failed for {username}'
 
 
 def test_upsert_creates_grade(client, grade_context):
@@ -11,6 +12,11 @@ def test_upsert_creates_grade(client, grade_context):
     })
     assert res.status_code == 201
     assert res.get_json() == {'message': 'saved'}
+
+    grades = client.get(f"/api/students/{grade_context['student1_id']}/grades").get_json()
+    saved = grades[0]['subcategories'][0]['grades'][0]
+    assert saved['value'] == 8.5
+    assert saved['date'] == '2024-01-15'
 
 
 def test_upsert_updates_existing_grade(client, grade_context):
@@ -91,16 +97,19 @@ def test_delete_removes_grade(client, grade_context):
     assert grades == []
 
 
-def test_delete_forbidden_for_other_teacher(client, grade_context):
-    # teacher1 creates a grade; teacher2 tries to delete it
+def test_delete_allowed_for_other_teacher(client, grade_context):
+    # shared pool: teacher1 creates a grade; teacher2 deletes it
     grade_id = _create_grade(client, grade_context, teacher='teacher1')
     login(client, 'teacher2', grade_context['password'])
     res = client.post('/api/grades', json={
         'student_id': grade_context['student1_id'],
         'delete_grade_ids': [grade_id],
     })
-    assert res.status_code == 403
-    assert res.get_json() == {'error': 'forbidden'}
+    assert res.status_code == 201
+    assert res.get_json() == {'message': 'saved'}
+
+    grades = client.get(f"/api/students/{grade_context['student1_id']}/grades").get_json()
+    assert grades == []
 
 
 def test_delete_rejects_nonexistent_grade(client, grade_context):

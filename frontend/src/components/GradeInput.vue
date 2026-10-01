@@ -1,18 +1,13 @@
 <script setup>
-import {computed} from 'vue'
+// defineModel is a vue macro that replaces these three parts:
+//   1: accept the parent's prop: const props = defineProps({modelValue: String})
+//   2: declare the event: const emit = defineEmits(['update:modelValue'])
+//   3: the stand-in: reading gives the prop, assigning sends the event
+//      const model = computed({get: () => props.modelValue, set: (v) => emit('update:modelValue', v)})
+const model = defineModel({type: String})
 
-// properties are set by parent, communicated towards children
-const props = defineProps({
-  modelValue: String, // current input string: '7.5' or ''
+defineProps({
   state: {type: String, default: null} // css class applied to wrapper: 'grade-cell-new', 'grade-cell-error' etc., set by parent.
-})
-// emits are information sent to parent, communicated from children
-const emit = defineEmits(['update:modelValue'])
-
-// writable computed so v-model="value" works in the template without mutating the prop directly
-const value = computed({
-  get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v)
 })
 </script>
 
@@ -20,10 +15,10 @@ const value = computed({
   <div :class="state" class="grade-input">
     <!-- type="text" prevents the browser from rejecting letters (e.g. "e" for scientific
          notation) before vue sees them, rejection resets cursor to 0 causing a visible jump;
-         inputmode="numeric" still shows the numeric keyboard on mobile -->
+         inputmode="decimal" still shows a number keypad on mobile, with a decimal separator key -->
     <input
-        v-model="value"
-        inputmode="numeric"
+        v-model="model"
+        inputmode="decimal"
         placeholder="-"
         type="text"
     />

@@ -1,5 +1,15 @@
-import {describe, expect, it} from 'vitest'
-import {localizeDate, validateLocalizedDate} from './dateUtils.js'
+import {describe, expect, it, vi} from 'vitest'
+import {localizeDate, localToday, validateLocalizedDate} from './dateUtils.js'
+
+describe('localToday', () => {
+    it('returns the local calendar day late in the evening', () => {
+        vi.useFakeTimers()
+        // new Date(year, monthIndex, ...) builds a local time: sep 30, 23:30 on this machine's clock
+        vi.setSystemTime(new Date(2026, 8, 30, 23, 30))
+        expect(localToday()).toBe('2026-09-30')
+        vi.useRealTimers()
+    })
+})
 
 describe('localizeDate', () => {
     it('formats iso date to DD/MM/YYYY', () => {

@@ -1,10 +1,9 @@
-from flask import Blueprint, request, jsonify
-from sqlalchemy import func, select
+from flask import Blueprint
 
-from app.db import get_session
-from app.models import User, Grade
-from app.routes.helpers.annotations import require_role
-from app.routes.helpers.users import create_user, delete_user
+from app.models import Grade
+from app.routes.helpers.decorators import require_role
+from app.routes.helpers.payload import get_body
+from app.routes.helpers.users import create_user, delete_user, list_users
 
 teachers_bp = Blueprint("teachers", __name__)
 
@@ -12,26 +11,13 @@ teachers_bp = Blueprint("teachers", __name__)
 @teachers_bp.route("/api/teachers")
 @require_role("admin")
 def get_teachers():
-    with get_session() as session:
-        rows = session.execute(
-            select(User, func.count(Grade.id).label("grade_count"))
-            .outerjoin(Grade, Grade.teacher_id == User.id)
-            .where(User.role == "teacher")
-            .group_by(User.id)
-            .order_by(User.id)
-        ).all()
-    return jsonify(
-        [
-            {"id": t.id, "username": t.username, "grade_count": count}
-            for t, count in rows
-        ]
-    )
+    return list_users("teacher", Grade.teacher_id)
 
 
 @teachers_bp.route("/api/teachers", methods=["POST"])
 @require_role("admin")
 def create_teacher():
-    return create_user("teacher", request.get_json() or {})
+    return create_user("teacher", get_body())
 
 
 @teachers_bp.route("/api/teachers/<int:teacher_id>", methods=["DELETE"])

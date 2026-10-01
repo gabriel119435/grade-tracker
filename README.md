@@ -26,12 +26,6 @@ open http://localhost:5173
 
 ## run (docker)
 
-copy `.env.example` to `.env` and fill in the values:
-
-```bash
-cp .env.example .env
-```
-
 ```bash
 docker compose up --build # start always rebuilding
 docker compose down -v    # stop and reset volumes
@@ -39,14 +33,20 @@ docker compose down -v    # stop and reset volumes
 
 open http://localhost
 
+works without `.env`, using the defaults below. to set your own values, copy `.env.example` to `.env` and edit it:
+
+```bash
+cp .env.example .env
+```
+
 ## env vars
 
 | var            | default                 | used in                                                    |
 |----------------|-------------------------|------------------------------------------------------------|
 | `SECRET_KEY`   | `dev-default-value`     | flask session signing                                      |
-| `ADMIN_PASS`   | `admin`                 | initial admin password (set on first run)                  |
+| `ADMIN_PASS`   | `admin-pass`            | initial admin password (set on first run)                  |
 | `FLASK_HOST`   | `127.0.0.1`             | flask bind address; set to `0.0.0.0` in docker via compose |
-| `CORS_ORIGINS` | `http://localhost:5173` | allowed frontend origin                                    |
+| `FLASK_DEBUG`  | `1`                     | reloader and debugger; set to `0` in docker via compose    |
 
 ## roles
 
@@ -56,7 +56,7 @@ open http://localhost
 | teacher | `/teacher/categories` | manage categories, students, and grades |
 | student | `/student`            | view own grades as charts               |
 
-default admin account: `admin` / `admin`; password can be changed from the admin screen.
+default admin account: `admin` / `admin-pass`; password can be changed from the admin screen.
 
 ## entities
 
@@ -75,4 +75,6 @@ cd frontend && npm test
 
 - [BACK_READ.md](BACK_READ.md), [FRONT_READ.md](FRONT_READ.md) and [INFRA_READ.md](INFRA_READ.md): beginner-friendly
   guides for navigating the codebase
+- [FRONT_BASICS.md](FRONT_BASICS.md): frontend concepts from scratch (node, npm, vite, vue, router, css); read
+  before FRONT_READ.md if frontend is new to you
 - [TODO.md](TODO.md): known improvements and future work

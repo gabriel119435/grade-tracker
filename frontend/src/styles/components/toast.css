@@ -14,8 +14,8 @@
     font-size: var(--font-3);
     color: var(--color-text-3);
 
-    /* pre-line: collapses whitespace like normal but preserves \n as a line break,
-       allowing multi-line toasts by passing "\n" in the message string */
+    /* pre-line: newlines stay as line breaks. long lines wrap.
+       so each "\n" in the message starts a new line, and a long line still fits the box */
     white-space: pre-line;
 
     z-index: var(--z-index-1); /* above dropdown and all other content */

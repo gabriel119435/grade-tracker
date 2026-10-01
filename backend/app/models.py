@@ -9,16 +9,27 @@ from app.db import Base
 
 @dataclass
 class AuthUser(UserMixin):
-    # plain dataclass copy of user fields, needed because get_session() closes the session after each request, detaching the orm object
-    # flask-login holds the user across requests so accessing a detached user would raise DetachedInstanceError; this stays alive freely
+    # flask-login needs a user object for login_user() and current_user.
+    # a User row can't be that object: its db session closes right away, which crashes on relationships.
+    # this copy holds only plain fields.
     id: int
     username: str
     role: str
     password_hash: str
     locale: str
 
+    @classmethod
+    def from_user(cls, user):
+        return cls(
+            id=user.id,
+            username=user.username,
+            role=user.role,
+            password_hash=user.password_hash,
+            locale=user.locale
+        )
 
-class User(UserMixin, Base):
+
+class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -50,7 +61,8 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
 
-    subcategories = relationship("Subcategory", back_populates="category", cascade="all, delete-orphan", order_by='Subcategory.id')
+    subcategories = relationship("Subcategory", back_populates="category", cascade="all, delete-orphan",
+                                 order_by='Subcategory.id')
 
 
 class Subcategory(Base):
@@ -74,14 +86,13 @@ class Grade(Base):
     value: Mapped[float]
     date: Mapped[str]  # stored as iso string, sqlite has no native date type
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    # last teacher who created or edited the grade; any teacher may edit or delete any grade
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     subcategory_id: Mapped[int] = mapped_column(ForeignKey("subcategories.id", ondelete="CASCADE"))
 
     __table_args__ = (
         # one grade per student per subcategory per day
         UniqueConstraint("student_id", "subcategory_id", "date"),
-        # read grades by student ordered by date
-        Index("ix_grades_student_date", "student_id", "date"),
         # count grades per teacher
         Index("ix_grades_teacher_id", "teacher_id"),
         # cascade deletion of a sub category

@@ -49,6 +49,17 @@ function validateNormalizedDate(normalizedDate) {
 
 }
 
+// today's date on the user's own calendar, as 'YYYY-MM-DD'
+// getFullYear, getMonth and getDate read the local timezone, not utc (toISOString would give the utc day)
+export function localToday() {
+    const now = new Date()
+    const year = now.getFullYear()
+    // getMonth counts from 0: january is 0
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
 // validates user input against the locale format, returns normalized date string if valid or null if invalid
 export function validateLocalizedDate(localizedDate, localDateFormat) {
     if (localizedDate.length !== localDateFormat.length) return null

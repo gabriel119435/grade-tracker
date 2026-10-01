@@ -7,11 +7,7 @@ import {useToast} from '../../composables/generic/useToast.js'
 import {useConfirm} from '../../composables/generic/useConfirm.js'
 import {translateError} from '../../utils/translateError.js'
 import {hasLeadingOrTrailingSpaces, isTooShort} from '../../utils/credentialValidation.js'
-
-async function load() {
-  const data = await getStudents()
-  if (!data.error) students.value = data
-}
+import {PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../../utils/limits.js'
 
 const {t} = useI18n()
 const students = ref([]) // [{id: 1, username: 'alice', grade_count: 12}]
@@ -22,6 +18,11 @@ const passwordError = computed(() => isTooShort(newPassword.value)) // true if p
 const {loading, withLoading} = useLoading()
 const {toast} = useToast()
 const {pendingId, confirm} = useConfirm()
+
+async function load() {
+  const data = await getStudents()
+  if (!data.error) students.value = data
+}
 
 onMounted(load)
 
@@ -54,8 +55,8 @@ async function handleCreateStudent() {
 <template>
   <div class="vertical-stack">
     <form class="single-line-form" @submit.prevent="handleCreateStudent">
-      <input v-model="newUsername" :placeholder="t('common.username')" maxlength="25" required/>
-      <input v-model="newPassword" :placeholder="t('common.password')" maxlength="25" required/>
+      <input v-model="newUsername" :placeholder="t('common.username')" :maxlength="USERNAME_MAX_LENGTH" required/>
+      <input v-model="newPassword" :placeholder="t('common.password')" :maxlength="PASSWORD_MAX_LENGTH" required/>
       <button :disabled="loading || usernameError || passwordError" class="btn-primary" type="submit">
         {{ t('students.create') }}
       </button>

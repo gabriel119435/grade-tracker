@@ -14,5 +14,8 @@ FROM b-base AS b-runtime
 COPY --from=b-test /app/.test-passed /tmp/.test-passed
 RUN uv sync --no-dev --frozen
 COPY . .
+RUN useradd --system --no-create-home non_root_backend_user && mkdir /data && chown non_root_backend_user /data
+USER non_root_backend_user
 EXPOSE 5000
-CMD ["uv", "run", "python", "run.py"]
+ENV PATH="/app/.venv/bin:$PATH"
+CMD ["python", "run.py"]

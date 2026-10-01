@@ -23,15 +23,13 @@ const {toast} = useToast()
 const {
   inputGradeDate,
   inputGradeEdits,
-  inputGradeErrors,
   apiResponseGrades,
   loadStudentGrades,
   submitStudentGrades,
-  validateGradeInput,
   cellStates
-} = useGrades(categories, () => t('grade_input.decimal_separator')) // getSeparator() is called at use time so locale changes mid-session are picked up
+} = useGrades(categories, () => t('grade_input.decimal_separator'))
 const {limit, setLimit} = useLimit()
-const hasGradeErrors = computed(() => Object.values(inputGradeErrors.value).some(Boolean))
+const hasGradeErrors = computed(() => Object.values(cellStates.value).includes('grade-cell-error'))
 const hasChanges = computed(() => Object.values(cellStates.value).some(s => s && s !== 'grade-cell-error'))
 const hasGrades = computed(() => apiResponseGrades.value.some(
     cat => cat.subcategories.some(sub => sub.grades.length > 0))
@@ -97,10 +95,10 @@ async function handleSubmit() {
           :categories="categories"
           :inputGradeEdits="inputGradeEdits"
           :cellStates="cellStates"
-          :validateGradeInput="validateGradeInput"
           :loading="loading"
           :hasGradeErrors="hasGradeErrors"
           :hasChanges="hasChanges"
+          @edit="(id, text) => inputGradeEdits[id] = text"
           @submit="handleSubmit"
       />
 

@@ -23,7 +23,7 @@ from werkzeug.security import generate_password_hash
 
 from app.db import get_session
 from app.models import Category, Grade, Subcategory, User
-from app.routes.helpers.annotations import require_role
+from app.routes.helpers.decorators import require_role
 
 seed_bp = Blueprint("seed", __name__)
 
@@ -32,31 +32,31 @@ TEACHER_COUNT = 5
 STUDENT_COUNT = 10
 GRADED_STUDENT_COUNT = 5
 
-# 10 male + 10 female first names, 20 last names; ascii only
+# 10 male + 10 female first names, 20 last names; pt-br spelling
 FIRST_NAMES = [
     # male
-    "jose", "joao", "antonio", "francisco", "pedro", "carlos", "lucas", "luiz", "paulo", "gabriel",
+    "josé", "joão", "antônio", "francisco", "pedro", "carlos", "lucas", "luiz", "paulo", "gabriel",
     # female
-    "maria", "ana", "francisca", "julia", "antonia", "juliana", "adriana", "fernanda", "marcia", "patricia",
+    "maria", "ana", "francisca", "júlia", "antônia", "juliana", "adriana", "fernanda", "márcia", "patrícia",
 ]
 LAST_NAMES = [
     "silva", "santos", "oliveira", "souza", "pereira", "ferreira", "lima", "alves", "rodrigues", "costa",
-    "sousa", "gomes", "nascimento", "araujo", "ribeiro", "almeida", "jesus", "barbosa", "soares", "carvalho",
+    "sousa", "gomes", "nascimento", "araújo", "ribeiro", "almeida", "jesus", "barbosa", "soares", "carvalho",
 ]
 
 # category -> subcategories, 50 subcats in total so the grade tier percentages split evenly
 CATEGORIES = {
-    "forehand": ["forca", "precisao", "consistencia", "profundidade", "mobilidade", "tecnica", "efeito"],
-    "backhand": ["forca", "precisao", "consistencia", "mobilidade", "tecnica", "profundidade"],
-    "saque": ["forca", "precisao", "efeito", "consistencia", "colocacao"],
-    "recepcao": ["posicionamento", "reflexo", "precisao", "mobilidade", "inteligencia"],
-    "curta": ["precisao", "disfarce", "inteligencia"],
-    "smash": ["forca", "velocidade", "timing", "colocacao", "salto", "finalizacao"],
-    "lob": ["altura", "profundidade", "disfarce", "inteligencia"],
-    "gancho": ["timing", "mobilidade", "tecnica"],
-    "voleio": ["reflexo", "precisao", "posicionamento", "velocidade", "mobilidade", "consistencia", "inteligencia",
+    "forehand": ["força", "precisão", "consistência", "profundidade", "mobilidade", "técnica", "efeito"],
+    "backhand": ["força", "precisão", "consistência", "mobilidade", "técnica", "profundidade"],
+    "saque": ["força", "precisão", "efeito", "consistência", "colocação"],
+    "recepção": ["posicionamento", "reflexo", "precisão", "mobilidade", "inteligência"],
+    "curta": ["precisão", "disfarce", "inteligência"],
+    "smash": ["força", "velocidade", "timing", "colocação", "salto", "finalização"],
+    "lob": ["altura", "profundidade", "disfarce", "inteligência"],
+    "gancho": ["timing", "mobilidade", "técnica"],
+    "voleio": ["reflexo", "precisão", "posicionamento", "velocidade", "mobilidade", "consistência", "inteligência",
                "timing"],
-    "veronica": ["timing", "tecnica", "colocacao"],
+    "verônica": ["timing", "técnica", "colocação"],
 }
 
 DAY1 = date(2025, 5, 25)
@@ -148,7 +148,8 @@ def _create_categories(session):
         session.add(cat)
         session.flush()  # assigns cat.id
 
-        for subcat_name in subcat_names: subcategories.append(Subcategory(name=subcat_name, category_id=cat.id))
+        for subcat_name in subcat_names:
+            subcategories.append(Subcategory(name=subcat_name, category_id=cat.id))
 
     session.add_all(subcategories)
     session.flush()

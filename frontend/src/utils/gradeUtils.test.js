@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {localizeGrade, normalizeGrade, trunc1dp, validateNormalizedGrade, buildGradesIndex, classifyGradeEdits} from './gradeUtils.js'
+import {localizeGrade, parseGrade, buildGradesIndex, classifyGradeEdits} from './gradeUtils.js'
 
 describe('buildGradesIndex', () => {
     it('returns empty index for empty input', () => {
@@ -53,18 +53,13 @@ describe('classifyGradeEdits', () => {
         const [result] = classifyGradeEdits({'3': {id: 10, value: 7.5}}, {'3': '7,5'}, ',')
         expect(result.state).toBe('unchanged')
     })
-    it('returns normalized value in result', () => {
-        const [result] = classifyGradeEdits({}, {'3': '8,0'}, ',')
-        expect(result.normalized).toBe('8.0')
+    it('returns parsed value in result', () => {
+        const [result] = classifyGradeEdits({}, {'3': '8,5'}, ',')
+        expect(result.value).toBe(8.5)
     })
-})
-
-describe('normalizeGrade', () => {
-    it('replaces comma separator with dot', () => {
-        expect(normalizeGrade('7,5', ',')).toBe('7.5')
-    })
-    it('leaves dot separator unchanged', () => {
-        expect(normalizeGrade('7.5', '.')).toBe('7.5')
+    it('classifies invalid text as error', () => {
+        const [result] = classifyGradeEdits({'3': {id: 10, value: 7.5}}, {'3': '7,5'}, '.')
+        expect(result.state).toBe('error')
     })
 })
 
@@ -80,41 +75,23 @@ describe('localizeGrade', () => {
     })
 })
 
-describe('trunc1dp', () => {
-    it('truncates extra decimals without rounding', () => {
-        expect(trunc1dp(7.99)).toBe(7.9)
-    })
-    it('leaves exact 1dp unchanged', () => {
-        expect(trunc1dp(8.5)).toBe(8.5)
-    })
-})
-
-describe('validateNormalizedGrade', () => {
-    it('accepts empty string', () => {
-        expect(validateNormalizedGrade('')).toBe(true)
+describe('parseGrade', () => {
+    it('accepts empty string as no grade', () => {
+        expect(parseGrade('', ',')).toEqual({valid: true, value: null})
     })
     it('accepts integer value', () => {
-        expect(validateNormalizedGrade('8')).toBe(true)
+        expect(parseGrade('8', ',')).toEqual({valid: true, value: 8})
     })
-    it('accepts value with one decimal', () => {
-        expect(validateNormalizedGrade('8.5')).toBe(true)
+    it('accepts value with one decimal and locale separator', () => {
+        expect(parseGrade('8,5', ',')).toEqual({valid: true, value: 8.5})
+        expect(parseGrade('8.5', '.')).toEqual({valid: true, value: 8.5})
     })
-    it('accepts boundary 0', () => {
-        expect(validateNormalizedGrade('0')).toBe(true)
+    it('accepts boundaries 0 and 10', () => {
+        expect(parseGrade('0', ',')).toEqual({valid: true, value: 0})
+        expect(parseGrade('10', ',')).toEqual({valid: true, value: 10})
     })
-    it('accepts boundary 10', () => {
-        expect(validateNormalizedGrade('10')).toBe(true)
-    })
-    it('rejects value above 10', () => {
-        expect(validateNormalizedGrade('10.1')).toBe(false)
-    })
-    it('rejects negative value', () => {
-        expect(validateNormalizedGrade('-1')).toBe(false)
-    })
-    it('rejects more than one decimal', () => {
-        expect(validateNormalizedGrade('8.55')).toBe(false)
-    })
-    it('rejects non-numeric string', () => {
-        expect(validateNormalizedGrade('abc')).toBe(false)
-    })
+    it.each(['10,1', '11', '-1', '-0', '8,55', 'abc', ' ', ' 7 ', '+5', '05', '1e1', '0x5', '7,', ',5', '7,5,3', '8.5'])(
+        'rejects %j with comma separator', (text) => {
+            expect(parseGrade(text, ',')).toEqual({valid: false, value: null})
+        })
 })

@@ -1,7 +1,6 @@
-# current tasks
-
 # future tasks
 
+- arenas: teachers and students tied to arenas; today every teacher shares all students, categories and grades
 - missing tests: backend has no coverage for auth, categories, students, and teachers routes
 - frontend has no component or composable tests (`useGrades`, `useToast`, `useConfirm`, and all vue components); highest-risk gap is the orchestration logic in `useGrades` (`cellStates`, `submitStudentGrades`)
 - per-request user load query: `load_user` runs a full `SELECT` on every authenticated request; add session-local caching if traffic grows

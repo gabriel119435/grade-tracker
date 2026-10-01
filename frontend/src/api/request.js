@@ -1,4 +1,5 @@
 import router from '../router/index.js'
+import {store} from '../store.js'
 
 export async function request(url, options = {}) {
     let res
@@ -14,6 +15,8 @@ export async function request(url, options = {}) {
     }
 
     if (res.status === 401 && url !== '/api/login') {
+        // session gone: forget the user, so the guard allows /login
+        store.user = null
         await router.push('/login')
         return {error: 'unauthorized'}
     }
@@ -24,12 +27,12 @@ export async function request(url, options = {}) {
             if (body.error) return {error: body.error}
         } catch {}
         console.error(`server error:`, text)
-        return {error: 'server_error'}
+        return {error: 'invalid_response'}
     }
     try {
         return await res.json()
     } catch (err) {
         console.error(`server error:`, err)
-        return {error: 'server_error'}
+        return {error: 'invalid_response'}
     }
 }

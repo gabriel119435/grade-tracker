@@ -1,17 +1,16 @@
 import {computed, ref, watch} from 'vue'
 import {saveGrades} from '../../api/routes/grades.js'
 import {useGradesLoader} from './useGradesLoader.js'
-import {normalizeGrade, localizeGrade, trunc1dp, validateNormalizedGrade, buildGradesIndex, classifyGradeEdits} from '../../utils/gradeUtils.js'
+import {localizeGrade, parseGrade, buildGradesIndex, classifyGradeEdits} from '../../utils/gradeUtils.js'
+import {localToday} from '../../utils/dateUtils.js'
 
 // categories: reactive list of categories with their subcategories
 // ref([{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}])
-// getSeparator: callback so locale changes mid-session are picked up on every keystroke
+// getSeparator: returns the current locale decimal separator: ',' or '.'
 export function useGrades(categories, getSeparator) {
     const {loadGrades} = useGradesLoader()
-    const today = new Date().toISOString().split('T')[0] // '2024-01-31'
-    const inputGradeDate = ref(today) // currently selected date in the date picker: '2024-01-31'
-    const inputGradeEdits = ref({}) // {3: '7.5', 4: ''} subcategoryId:what the user typed
-    const inputGradeErrors = ref({}) // {3: false, 4: true} subcategoryId:true if input is invalid
+    const inputGradeDate = ref(localToday()) // currently selected date in the date picker: '2024-01-31'
+    const inputGradeEdits = ref({}) // {3: '7,5', 4: '', 7: 'abc'} subcategoryId:cell text exactly as shown
     // {'2024-01-31': {3: {id: 10, value: 7.5}}} -- loaded grades keyed by date then subcategoryId for O(1) lookup
     const indexedGrades = ref({})
     // raw api response array
@@ -27,7 +26,6 @@ export function useGrades(categories, getSeparator) {
             }
         }
         inputGradeEdits.value = localizedInputs
-        inputGradeErrors.value = {}
     }
 
     async function loadStudentGrades(studentId, resetDate = true, limit = null) {
@@ -35,22 +33,16 @@ export function useGrades(categories, getSeparator) {
         if (!data) return
         indexedGrades.value = buildGradesIndex(data)
         apiResponseGrades.value = data
-        if (resetDate) inputGradeDate.value = today
+        if (resetDate) inputGradeDate.value = localToday()
         prefillFromDate(inputGradeDate.value)
     }
 
-    // validates one input on keystroke and writes the boolean into inputGradeErrors
-    function validateGradeInput(subcategoryId) {
-        inputGradeErrors.value[subcategoryId] =
-            !validateNormalizedGrade(normalizeGrade(inputGradeEdits.value[subcategoryId], getSeparator()))
-    }
-
+    // {3: null, 4: 'grade-cell-new', 7: 'grade-cell-error'}
     const cellStates = computed(() => {
         const dayGrades = indexedGrades.value[inputGradeDate.value] ?? {}
         const result = {}
         for (const {subcategoryId, state} of classifyGradeEdits(dayGrades, inputGradeEdits.value, getSeparator())) {
-            if (inputGradeErrors.value[subcategoryId]) result[subcategoryId] = 'grade-cell-error'
-            else result[subcategoryId] = state === 'unchanged' ? null : `grade-cell-${state}`
+            result[subcategoryId] = state === 'unchanged' ? null : `grade-cell-${state}`
         }
         return result
     })
@@ -60,11 +52,11 @@ export function useGrades(categories, getSeparator) {
         const toUpsert = []
         const toDelete = []
 
-        for (const {subcategoryId, original, normalized, state} of classifyGradeEdits(dayGrades, inputGradeEdits.value, getSeparator())) {
+        for (const {subcategoryId, original, value, state} of classifyGradeEdits(dayGrades, inputGradeEdits.value, getSeparator())) {
             if (state === 'new' || state === 'updating') {
                 toUpsert.push({
                     subcategory_id: Number(subcategoryId),
-                    value: trunc1dp(parseFloat(normalized))
+                    value
                 })
             } else if (state === 'deleting') {
                 toDelete.push(original.id)
@@ -84,14 +76,21 @@ export function useGrades(categories, getSeparator) {
 
     watch(inputGradeDate, prefillFromDate)
 
+    // locale switch: valid cells are rewritten with the new separator, invalid cells are kept as typed
+    // en -> pt-br: '7.5' -> '7,5', '' -> '', 'abc' -> 'abc', '5,3' -> '5,3' (now valid)
+    watch(getSeparator, (newSeparator, oldSeparator) => {
+        for (const [subcategoryId, text] of Object.entries(inputGradeEdits.value)) {
+            const {valid, value} = parseGrade(text, oldSeparator)
+            if (valid && value !== null) inputGradeEdits.value[subcategoryId] = localizeGrade(value, newSeparator)
+        }
+    })
+
     return {
         inputGradeDate,      // ref: currently selected date bound to the date picker
-        inputGradeEdits,     // ref: map of subcategoryId:raw locale-formatted string, bound to each GradeInput
-        inputGradeErrors,    // ref: map of subcategoryId:true if invalid, false if valid
+        inputGradeEdits,     // ref: map of subcategoryId:cell text exactly as shown, bound to each GradeInput
         apiResponseGrades,   // ref: raw api response array passed as-is to GradeCharts
         loadStudentGrades,   // async fn(studentId, resetDate?, limit?): fetches grades, rebuilds index, prefills inputs
         submitStudentGrades, // async fn(studentId): diffs inputs vs index, upserts new/changed, deletes cleared
-        validateGradeInput,  // fn(subcategoryId): validates one input on change using composable-level separator
         cellStates           // computed: map of subcategoryId with CSS class string (new/updating/deleting/error/null)
     }
 }

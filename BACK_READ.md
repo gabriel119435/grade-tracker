@@ -12,8 +12,9 @@ each new file builds on what came before; read them in order for the most cohere
     - `__init__.py`: `create_app()`; wires the database, auth, error handling, and all blueprints into a running flask
       app
 - **route helpers**: shared utilities used by blueprints
-    - `routes/helpers/annotations.py`: `require_role()` decorator; restricts an endpoint to specific logged in roles
-    - `routes/helpers/users.py`: create and delete user methods; shared by both the teachers and students blueprints
+    - `routes/helpers/decorators.py`: `require_role()` decorator; restricts an endpoint to specific logged in roles
+    - `routes/helpers/payload.py`: `get_body()`, `get_str()`, `get_int()`, `get_list()`; 400 if wrong type from json
+    - `routes/helpers/users.py`: password rules, list, create and delete user methods; both teachers and students
 - **routes**: one blueprint per resource
     - `routes/auth.py`: login, logout, session check, locale change, and admin password change
     - `routes/teachers.py`: list, create, and delete teacher accounts; admin only
