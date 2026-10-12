@@ -26,42 +26,51 @@ open http://localhost:5173
 
 ## run (docker)
 
-copy `.env.example` to `.env` and fill in the values:
+```bash
+docker compose up --build # always rebuilds it
+docker compose down -v    # stops and deletes volumes
+```
+
+open http://localhost
+
+## config
+
+if no `.env` is configured, the app uses insecure public defaults values.
+to set your own values, copy `.env.example` to `.env` and edit it:
 
 ```bash
 cp .env.example .env
 ```
 
-```bash
-docker compose up --build # start always rebuilding
-docker compose down -v    # stop and reset volumes
-```
-
-open http://localhost
+`ADMIN_PASS` is only read when db is built.
 
 ## env vars
 
-| var            | default                 | used in                                                    |
-|----------------|-------------------------|------------------------------------------------------------|
-| `SECRET_KEY`   | `dev-default-value`     | flask session signing                                      |
-| `ADMIN_PASS`   | `admin`                 | initial admin password (set on first run)                  |
-| `FLASK_HOST`   | `127.0.0.1`             | flask bind address; set to `0.0.0.0` in docker via compose |
-| `CORS_ORIGINS` | `http://localhost:5173` | allowed frontend origin                                    |
+| var                     | default             | used in                                                    |
+|-------------------------|---------------------|------------------------------------------------------------|
+| `SECRET_KEY`            | `dev-default-value` | flask session signing                                      |
+| `ADMIN_PASS`            | `admin pass`        | initial admin password (set on first run)                  |
+| `SESSION_COOKIE_SECURE` | `0`                 | `1` sends the session cookie only over https               |
+| `FLASK_HOST`            | `127.0.0.1`         | flask bind address; set to `0.0.0.0` in docker via compose |
+| `FLASK_DEBUG`           | `1`                 | reloader and debugger; set to `0` in docker via compose    |
+| `DATABASE_URL`          | `backend/app.db`    | sqlalchemy db url; docker points it to the `/data` volume  |
 
 ## roles
 
-| role    | lands on              | can do                                  |
-|---------|-----------------------|-----------------------------------------|
-| admin   | `/admin/teachers`     | create and delete teacher accounts      |
-| teacher | `/teacher/categories` | manage categories, students, and grades |
-| student | `/student`            | view own grades as charts               |
+| role    | lands on              | can do                                                        |
+|---------|-----------------------|---------------------------------------------------------------|
+| admin   | `/admin/teachers`     | create and delete teacher accounts, change own password, seed |
+| teacher | `/teacher/categories` | manage categories, students, and grades                       |
+| student | `/student`            | view own grades as charts                                     |
 
-default admin account: `admin` / `admin`; password can be changed from the admin screen.
+default admin account: `admin` / `admin pass`; password can be changed from the admin screen.
+
+seed button: wipes db except `admin`, then creates demo data; all seeded users log in with password `seed pass`.
 
 ## entities
 
 - **category**: top-level grouping (e.g. serve)
-- **subcategory**: belongs to a category (e.g. slice); each gets its own line chart
+- **subcategory**: belongs to a category (e.g. strength); each gets its own line chart
 - **grade**: value 0.0–10.0 with one decimal, tied from a teacher to a student + subcategory + date
 
 ## test
@@ -73,6 +82,6 @@ cd frontend && npm test
 
 ## codebase guides
 
-- [BACK_READ.md](BACK_READ.md), [FRONT_READ.md](FRONT_READ.md) and [INFRA_READ.md](INFRA_READ.md): beginner-friendly
-  guides for navigating the codebase
+- [FRONT_BASICS.md](FRONT_BASICS.md): frontend concepts from scratch
+- [BACK_READ.md](BACK_READ.md), [FRONT_READ.md](FRONT_READ.md) and [INFRA_READ.md](INFRA_READ.md): beginner guides
 - [TODO.md](TODO.md): known improvements and future work

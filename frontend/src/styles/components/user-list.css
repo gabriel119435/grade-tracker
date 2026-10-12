@@ -7,6 +7,6 @@
 
 /* grade counter label, smaller and softer than the username above it */
 .user-count {
-    color: var(--color-text-2);
+    color: var(--color-fg-2);
     font-size: var(--font-scale-0);
 }

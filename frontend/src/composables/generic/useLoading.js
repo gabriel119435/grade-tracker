@@ -1,20 +1,25 @@
-import {ref} from 'vue'
+import {nextTick, ref} from 'vue'
 
 export function useLoading() {
-    // ref wraps the value in .value so vue can track changes to a primitive
-    // declared inside the function so each useLoading() call gets its own independent loading state
     const loading = ref(false)
 
     async function withLoading(fn) {
-        // if called while another function is running, simply does not call fn
         if (loading.value) return
+        const focused = document.activeElement
         loading.value = true
         try {
             await fn()
         } finally {
             loading.value = false
+            // a button disabled while focused drops focus to <body>
+            // after vue re-enables it, focus goes back, unless the button is gone (deleted row, new page)
+            await nextTick()
+            if (document.activeElement === document.body && focused?.isConnected) focused.focus()
         }
     }
 
+    // slow request plus repeated clicks can send the same action several times
+    // withLoading(fn) runs fn with `loading` true, calls made meanwhile are ignored
+    // read `loading` to disable buttons, write via `withLoading()`
     return {loading, withLoading}
 }

@@ -1,8 +1,8 @@
 /* large outer card holding all grade history charts
-   one step darker than page background to visually separate from page */
+   two steps darker than the page background (bg-2 on bg-0) to separate it from the page */
 .history-card {
-    background: var(--color-surface-2);
-    border-color: var(--color-surface-3);
+    background: var(--color-bg-2);
+    border-color: var(--color-b-0);
     padding: var(--space-3);
     align-items: center;
     gap: var(--space-3);
@@ -19,16 +19,21 @@
 
 /* category name bar that collapses or expands its charts on click */
 .category-title {
-    display: inline-flex; /* like inline-block but for flex containers: shrinks to content width */
+    /* like inline-block but for flex containers: shrinks to content width */
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
-    background: var(--color-surface-4);
-    border: var(--border-width) solid var(--color-surface-4); /* matches background so it's invisible at rest; prevents layout shift when hover changes border-color */
+    background: var(--color-bg-4);
+    /* same color as the background, so it's invisible at rest
+       reserves the border's space, so the hover border-color causes no layout shift */
+    border: var(--border-width) solid var(--color-bg-4);
     border-radius: var(--border-radius-0);
     padding: var(--space-1) var(--space-3);
     cursor: pointer;
     font-size: var(--font-3);
-    color: var(--color-text-1);
+    /* a button inside the h3, browsers don't pass the heading bold into it */
+    font-weight: inherit;
+    color: var(--color-fg-1);
 }
 
 /* average score line shown below the category name */
@@ -37,26 +42,28 @@
 }
 
 .category-title:hover {
-    background: var(--color-surface-2);
-    border-color: var(--color-border-0);
+    background: var(--color-bg-2);
+    border-color: var(--color-b-2);
 }
 
 /* card grouping all subcategory charts for one category */
 .category-card {
-    background: var(--color-surface-3);
-    border-color: var(--color-surface-4);
+    background: var(--color-bg-3);
+    border-color: var(--color-b-1);
     padding: var(--space-3);
-    width: fit-content; /* shrinks to content width; works because chart-card has a fixed width */
+    /* shrinks to content width, works because chart-card has a fixed width */
+    width: fit-content;
     align-items: center;
     gap: var(--space-3);
 }
 
 /* card wrapping one subcategory chart and its label */
 .chart-card {
-    background: var(--color-surface-1);
-    border-color: var(--color-surface-3);
+    background: var(--color-bg-1);
+    border-color: var(--color-b-0);
     padding: var(--space-2);
-    width: var(--width-chart); /* fixed so chart.js has a defined container to render into */
+    /* fixed so chart.js has a defined container to render into */
+    width: var(--width-chart);
     align-items: center;
     gap: var(--space-1);
 }
@@ -67,14 +74,14 @@
     flex-direction: column;
     align-items: center;
     font-size: var(--font-0);
-    color: var(--color-text-2);
-    background: var(--color-surface-2);
-    border: var(--border-width) solid var(--color-surface-3);
+    color: var(--color-fg-2);
+    background: var(--color-bg-2);
+    border: var(--border-width) solid var(--color-b-0);
     border-radius: var(--border-radius-1);
     padding: var(--space-0) var(--space-2);
 }
 
-/* most recent grade shown below the subcategory name inside the badge; dimmed to de-emphasize */
+/* most recent grade shown below the subcategory name inside the badge, dimmed to de-emphasize */
 .subcat-latest {
     opacity: var(--opacity-1);
 }

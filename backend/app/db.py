@@ -13,27 +13,38 @@ class Base(DeclarativeBase):
     pass
 
 
-DB_URL = os.environ.get('DATABASE_URL', f'sqlite:///{DB_PATH}')
+DB_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
+
+# journal_mode is sqlite's default delete: reads see the last commit while a write is open, a commit waits for open reads
+# a wait longer than 5s (pysqlite default timeout) fails with "database is locked"
 
 # conftest.py sets DATABASE_URL to sqlite:///:memory:
-if DB_URL == 'sqlite:///:memory:':
+if DB_URL == "sqlite:///:memory:":
     from sqlalchemy.pool import StaticPool
 
+    # in-memory sqlite is per connection: StaticPool shares one connection
+    # used across threads, so the same-thread check is off
     engine = create_engine(
         DB_URL,
-        # prod uses one connection per request (same thread), StaticPool shares one connection across sessions, which can cross threads
-        connect_args={'check_same_thread': False},
-        # in-memory sqlite is per-connection, not shared ram, StaticPool reuses one connection so fixture data is visible to every test
+        connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
 else:
     engine = create_engine(DB_URL)
 
 
-# enforce fk rules on db by default
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_conn, _):
+    # enforce fk rules on db by default
     dbapi_conn.execute("PRAGMA foreign_keys = ON")
+
+
+@event.listens_for(engine, "checkin")
+def reset_query_only(dbapi_conn, _):
+    # every connection returns to the pool writable, whatever path released it
+    # None when the connection was invalidated, nothing to reset
+    if dbapi_conn is not None:
+        dbapi_conn.execute("PRAGMA query_only = OFF")
 
 
 SessionLocal = sessionmaker(
@@ -43,11 +54,11 @@ SessionLocal = sessionmaker(
 
 @contextmanager
 def get_session(write=False):
-    # plain sqlalchemy instead of flask-sqlalchemy, keeps sessions independent of the app
-    # context so scripts, tests, and CLI tools can open sessions without a running flask app
-    # read-only by default; pass write=True only when the session needs to commit changes
+    # plain sqlalchemy instead of flask-sqlalchemy, keeps sessions independent of the app context.
+    # scripts, tests, and cli tools can open sessions without a running flask app
     session = SessionLocal()
     try:
+        # read-only by default; pass write=True only when the session needs to commit changes
         if not write:
             session.execute(text("PRAGMA query_only = ON"))
         yield session
@@ -57,6 +68,4 @@ def get_session(write=False):
         session.rollback()
         raise
     finally:
-        if not write:
-            session.execute(text("PRAGMA query_only = OFF"))
         session.close()

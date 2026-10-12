@@ -5,9 +5,7 @@ export async function getStudents() {
 }
 
 export async function createStudent(username, password) {
-    return request('/api/students', {
-        method: 'POST', body: JSON.stringify({username, password})
-    })
+    return request('/api/students', {method: 'POST', body: JSON.stringify({username, password})})
 }
 
 export async function deleteStudent(id) {

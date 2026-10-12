@@ -1,36 +1,28 @@
 <script setup>
-import {computed, onMounted, ref, watch} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {store} from '../../store.js'
-import {useLimit} from '../../composables/grades/useLimit.js'
-import {useGradesLoader} from '../../composables/grades/useGradesLoader.js'
+import {useChartGrades} from '../../composables/grades/useChartGrades.js'
+import {GRADE_HISTORY_LIMITS} from '../../constants.js'
 import GradeCharts from '../../components/GradeCharts.vue'
-import GradeLimitControls from '../../components/GradeLimitControls.vue'
 
-const grades = ref([])
-const {loadGrades} = useGradesLoader()
-const {limit, setLimit} = useLimit()
+const {chartGrades, chartGradesReady, chartGradesFailed, loadChartGrades} = useChartGrades()
+const limit = ref(GRADE_HISTORY_LIMITS[0])
 
-async function load() {
-  const data = await loadGrades(store.user.id, limit.value)
-  if (data) grades.value = data
-}
-
-watch(limit, load)
-const hasGrades = computed(() =>
-    grades.value.some(cat =>
-        cat.subcategories.some(sub => sub.grades.length > 0)
-    )
-)
+// the logged-in student's own charts
+const load = () => loadChartGrades(store.user.id, limit.value)
 
 onMounted(load)
+watch(limit, load)
 </script>
 
 <template>
   <div class="vertical-stack">
-    <GradeCharts :grades="grades">
-      <template v-if="hasGrades" #controls>
-        <GradeLimitControls :limit="limit" @set="setLimit"/>
-      </template>
-    </GradeCharts>
+    <GradeCharts
+      v-model:limit="limit"
+      :grades="chartGrades"
+      :ready="chartGradesReady"
+      :failed="chartGradesFailed"
+      @retry="load"
+    />
   </div>
 </template>

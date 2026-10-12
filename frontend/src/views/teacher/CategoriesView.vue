@@ -9,104 +9,133 @@ import {
   getCategories
 } from '../../api/routes/categories.js'
 import {useLoading} from '../../composables/generic/useLoading.js'
-import {useToast} from '../../composables/generic/useToast.js'
+import {useAction} from '../../composables/generic/useAction.js'
 import {useConfirm} from '../../composables/generic/useConfirm.js'
-import {translateError} from '../../utils/translateError.js'
+import {useListLoad} from '../../composables/generic/useListLoad.js'
+import {NAME_MAX_LENGTH} from '../../constants.js'
+import LoadError from '../../components/LoadError.vue'
 
-const categories = ref([]) // [{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}]
-const newCategoryName = ref('') // bound to the new category input: 'forehand'
-const newSubcategoryNames = ref({}) // categoryId:new subcategory input: {1: 'topspin'}
 const {t} = useI18n()
-const {loading, withLoading} = useLoading()
-const {toast} = useToast()
-const {pendingId, confirm} = useConfirm()
+// categories: [{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}]
+// full reload after every mutation; categories change infrequently so the extra request is imperceptible
+const {items: categories, failed: categoriesFailed, load} = useListLoad(getCategories)
+// new category input text: 'forehand'
+const newCategoryName = ref('')
+// categoryId -> new subcategory input text: {1: 'topspin'}
+const newSubcategoryNames = ref({})
 
-async function load() {
-  // full reload after every mutation; categories change infrequently so the extra request is imperceptible
-  const data = await getCategories()
-  if (!data.error) categories.value = data
-}
+// no live checks on category and subcategory inputs: errors show only as toasts, so card height never changes
+
+const {loading, withLoading} = useLoading()
+const {runAction} = useAction(withLoading)
+const {pendingId, confirm} = useConfirm()
 
 onMounted(load)
 
 async function handleCreateCategory() {
-  await withLoading(async () => {
-    const data = await createCategory(newCategoryName.value)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      newCategoryName.value = ''
-      await load()
-    }
+  await runAction(() => createCategory(newCategoryName.value), async () => {
+    newCategoryName.value = ''
+    await load()
   })
 }
 
+// 'cat-' and 'sub-' prefixes keep category and subcategory ids apart in the shared pendingId
 async function handleDeleteCategory(id) {
-  if (!confirm('cat-' + id)) return // 'cat-' prefix avoids id collision with subcategories in the shared pendingId ref
-  await withLoading(async () => {
-    const data = await deleteCategory(id)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      await load()
-    }
-  })
+  if (!confirm('cat-' + id)) return
+  await runAction(() => deleteCategory(id), load)
 }
 
 async function handleCreateSubcategory(categoryId) {
-  await withLoading(async () => {
-    const data = await createSubcategory(newSubcategoryNames.value[categoryId], categoryId)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      newSubcategoryNames.value[categoryId] = ''
-      await load()
-    }
+  await runAction(() => createSubcategory(newSubcategoryNames.value[categoryId], categoryId), async () => {
+    newSubcategoryNames.value[categoryId] = ''
+    await load()
   })
 }
 
 async function handleDeleteSubcategory(id) {
-  if (!confirm('sub-' + id)) return // 'sub-' prefix avoids id collision with categories in the shared pendingId ref
-  await withLoading(async () => {
-    const data = await deleteSubcategory(id)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      await load()
-    }
-  })
+  if (!confirm('sub-' + id)) return
+  await runAction(() => deleteSubcategory(id), load)
 }
 </script>
 
 <template>
   <div class="vertical-stack">
-    <form class="single-line-form" @submit.prevent="handleCreateCategory">
-      <input v-model.trim="newCategoryName" :placeholder="t('categories.new_category')" maxlength="25" required/>
-      <button :disabled="loading" class="btn-primary" type="submit">{{ t('categories.add_category') }}</button>
+    <form
+      class="single-line-form"
+      @submit.prevent="handleCreateCategory"
+    >
+      <input
+        v-model.trim="newCategoryName"
+        required
+        :placeholder="t('categories.new_category')"
+        :maxlength="NAME_MAX_LENGTH"
+      />
+      <button
+        class="btn-primary"
+        type="submit"
+        :disabled="loading"
+      >
+        {{ t('categories.add_category') }}
+      </button>
     </form>
 
-    <div class="cards-row">
-      <div v-for="cat in categories" :key="cat.id" class="list-card category-management">
+    <LoadError
+      v-if="categoriesFailed"
+      class="list-card"
+      :message="t('categories.load_failed')"
+      @retry="load"
+    />
+    <div
+      v-else-if="categories.length"
+      class="cards-row"
+    >
+      <div
+        v-for="cat in categories"
+        :key="cat.id"
+        class="list-card category-management"
+      >
         <div class="category-header">
-          <strong>{{ cat.name }}</strong>
-          <button :disabled="loading" :class="pendingId === 'cat-' + cat.id ? 'btn-danger-confirm' : 'btn-danger'"
-                  @click="handleDeleteCategory(cat.id)">
+          <strong class="wrap-name">{{ cat.name }}</strong>
+          <button
+            :class="pendingId === 'cat-' + cat.id ? 'btn-danger-confirm' : 'btn-danger'"
+            type="button"
+            :disabled="loading"
+            @click="handleDeleteCategory(cat.id)"
+          >
             {{ pendingId === 'cat-' + cat.id ? t('common.confirmation') : t('common.delete') }}
           </button>
         </div>
 
-        <div v-for="sub in cat.subcategories" :key="sub.id" class="item-row">
-          <span>{{ sub.name }}</span>
-          <button :disabled="loading" :class="pendingId === 'sub-' + sub.id ? 'btn-danger-confirm' : 'btn-danger'"
-                  @click="handleDeleteSubcategory(sub.id)">
+        <div
+          v-for="sub in cat.subcategories"
+          :key="sub.id"
+          class="item-row"
+        >
+          <span class="wrap-name">{{ sub.name }}</span>
+          <button
+            :class="pendingId === 'sub-' + sub.id ? 'btn-danger-confirm' : 'btn-danger'"
+            type="button"
+            :disabled="loading"
+            @click="handleDeleteSubcategory(sub.id)"
+          >
             {{ pendingId === 'sub-' + sub.id ? t('common.confirmation') : t('common.delete') }}
           </button>
         </div>
 
         <form @submit.prevent="handleCreateSubcategory(cat.id)">
-          <input v-model.trim="newSubcategoryNames[cat.id]" :placeholder="t('categories.new_subcategory')"
-                 maxlength="25" required/>
-          <button :disabled="loading" class="btn-primary" type="submit">{{ t('categories.add_subcategory') }}</button>
+          <input
+            v-model.trim="newSubcategoryNames[cat.id]"
+            required
+            :placeholder="t('categories.new_subcategory')"
+            :maxlength="NAME_MAX_LENGTH"
+          />
+          <button
+            class="btn-primary"
+            type="submit"
+            :disabled="loading"
+          >
+            {{ t('categories.add_subcategory') }}
+          </button>
         </form>
       </div>
     </div>

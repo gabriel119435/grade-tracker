@@ -1,45 +1,44 @@
-from flask import Blueprint, request, jsonify, abort
-from flask_login import login_user, logout_user, current_user, login_required
+from flask import Blueprint, jsonify, abort
+from flask_login import login_user, logout_user, current_user
 from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from app.constants import LOCALES
 from app.db import get_session
-from app.models import User
-from app.routes.helpers.annotations import require_role
+from app.models import AuthUser, User
+from app.routes.helpers.decorators import require_role
+from app.routes.helpers.payload import get_body, get_str
+from app.validation import password_error
 
 auth_bp = Blueprint("auth", __name__)
 
 
+# public user fields sent to the frontend, never the password hash
+def _user_json(user):
+    return {"id": user.id, "username": user.username, "role": user.role, "locale": user.locale}
+
+
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
-    data = request.get_json() or {}
-    username = data.get("username", "").strip()
-    password = data.get("password", "")
+    data = get_body()
+    username = get_str(data, "username", "").strip()
+    password = get_str(data, "password", "")
 
     with get_session() as session:
-        user = session.execute(
-            select(User).filter_by(username=username)
-        ).scalar_one_or_none()
+        user = session.scalar(select(User).filter_by(username=username))
 
         if not user or not check_password_hash(user.password_hash, password):
             abort(401, "invalid_credentials")
 
-        login_user(user)
-        return jsonify(
-            {
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "role": user.role,
-                    "locale": user.locale,
-                }
-            }
-        )
+        auth_user = AuthUser.from_user(user)
+
+    login_user(auth_user)
+    return jsonify({"user": _user_json(auth_user)})
 
 
-# flask registers bottom-up, executes top-down. always innermost decorators first
+# @route stays on top: decorators apply bottom-up. if swapped, flask would register the unprotected function
 @auth_bp.route("/api/logout", methods=["POST"])
-@login_required
+@require_role()
 def logout():
     logout_user()
     return jsonify({"message": "logged out"})
@@ -48,41 +47,34 @@ def logout():
 @auth_bp.route("/api/admin/password", methods=["PATCH"])
 @require_role("admin")
 def change_admin_password():
-    data = request.get_json() or {}
-    old_password = data.get("old_password", "")
-    new_password = data.get("new_password", "")
+    data = get_body()
+    old_password = get_str(data, "old_password", "")
+    new_password = get_str(data, "new_password", "")
 
     if not check_password_hash(current_user.password_hash, old_password):
         abort(400, "wrong_current_password")
 
-    if len(new_password) < 8:
-        abort(400, "password_too_short")
-
-    if len(new_password) > 25:
-        abort(400, "password_too_long")
+    error = password_error(new_password)
+    if error:
+        abort(400, error)
 
     with get_session(write=True) as session:
         new_pass_hash = generate_password_hash(new_password)
         admin = session.get(User, current_user.id)
 
         admin.password_hash = new_pass_hash
-        # update the in-memory auth user so the new hash is used for the rest of this session without requiring a re-login
-        current_user.password_hash = new_pass_hash
 
     # outside the session, already committed
+    # the new hash invalidates current session, so it is reissued to stay logged in
+    login_user(AuthUser.from_user(admin))
     return jsonify({"message": "password updated"})
 
 
-@auth_bp.route("/api/locales")
-def get_locales():
-    return jsonify(User.locale.type.enums)
-
-
 @auth_bp.route("/api/users/locale", methods=["PATCH"])
-@login_required
+@require_role()
 def set_locale():
-    locale = (request.get_json() or {}).get("locale", "")
-    if locale not in User.locale.type.enums:
+    locale = get_str(get_body(), "locale")
+    if locale not in LOCALES:
         abort(400, "invalid_locale")
     with get_session(write=True) as session:
         user = session.get(User, current_user.id)
@@ -92,12 +84,6 @@ def set_locale():
 
 @auth_bp.route("/api/me")
 def me():
-    if current_user.is_authenticated:
-        response = {
-            "id": current_user.id,
-            "username": current_user.username,
-            "role": current_user.role,
-            "locale": current_user.locale,
-        }
-        return jsonify({"user": response})
-    return jsonify({"user": None})
+    return jsonify(
+        {"user": _user_json(current_user) if current_user.is_authenticated else None}
+    )

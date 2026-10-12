@@ -2,9 +2,11 @@
 import {computed} from 'vue'
 import {Line} from 'vue-chartjs'
 import {CategoryScale, Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip} from 'chart.js'
+import {useI18n} from 'vue-i18n'
+import {localizeDate} from '../utils/dateUtils.js'
 
-// chart.js is tree-shakable: only the pieces you register are included in the bundle.
-// CategoryScale x-axis with string labels
+// chart.js is tree-shakable: only the pieces registered here are included in the bundle
+// CategoryScale: x-axis with string labels
 // LinearScale: y-axis with numeric values
 // PointElement: the dots on the line
 // LineElement: the line itself
@@ -12,30 +14,40 @@ import {CategoryScale, Chart as ChartJS, LinearScale, LineElement, PointElement,
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
 
 const props = defineProps({
-  grades: Array, // [{date: '2024-01-31', value: 7.5}] -- one entry per saved grade for this subcategory
+  // one subcategory's last n grades, oldest first: [{id: 10, date: '2024-01-31', value: 7.5}]
+  grades: {type: Array, required: true},
 })
+
+const {t, locale} = useI18n()
 
 // chart.js renders on a canvas, which is outside vue's templating system and cannot read css variables directly
 // getComputedStyle reads the resolved value from the dom so chart.js can use the design token
-const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--color-border-0').trim()
+const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--color-b-2').trim()
 
-const data = computed(() => ({
-  labels: props.grades.map(g => g.date), // date strings used as plain category labels
+const chartData = computed(() => ({
+  // dates in the locale format used as plain category labels: '31/01/2024'
+  labels: props.grades.map(g => localizeDate(g.date, t('date_input.format'))),
   datasets: [{
     data: props.grades.map(g => g.value),
     borderColor,
     borderWidth: 2,
     pointRadius: 1,
-    clip: false    // allows point circles to render beyond y-axis min/max boundary (value 0 or 10)
-  }]
+    // point circles render past the y-axis min/max (values 0 or 10)
+    clip: false,
+  }],
 }))
 
-const options = computed(() => ({
-  responsive: true,          // chart resizes with its container width
-  maintainAspectRatio: true, // preserves aspectRatio below when container resizes
-  aspectRatio: 2,            // width:height ratio, 2 means width is twice the height
+// computed: vue-chartjs only reapplies options when it gets a new object, a locale switch builds one
+const chartOptions = computed(() => ({
+  // tooltip value and y-axis numbers follow the app locale, not the browser's
+  locale: locale.value,
+  // resizes with the container width, keeping width twice the height
+  responsive: true,
+  maintainAspectRatio: true,
+  aspectRatio: 2,
   plugins: {
-    tooltip: {displayColors: false} // removes colored square from tooltip; only one dataset, square adds nothing
+    // no colored square in the tooltip, with one dataset it adds nothing
+    tooltip: {displayColors: false},
   },
   scales: {
     x: {
@@ -43,18 +55,22 @@ const options = computed(() => ({
         maxRotation: 0,
         minRotation: 0,
         font: {size: 10},
+        // shows only the first and last label, null hides a label but keeps its tick
         callback(value, index, ticks) {
-          // show only first and last label; return null hides the label without removing the tick
           if (index === 0 || index === ticks.length - 1) return this.getLabelForValue(value)
           return null
-        }
-      }
+        },
+      },
     },
-    y: {min: 0, max: 10} // grades are always in the 0–10 range
+    // grades are always in the 0-10 range
+    y: {min: 0, max: 10},
   },
 }))
 </script>
 
 <template>
-  <Line :data="data" :options="options"/>
+  <Line
+    :data="chartData"
+    :options="chartOptions"
+  />
 </template>

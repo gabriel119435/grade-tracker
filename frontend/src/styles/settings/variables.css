@@ -1,41 +1,64 @@
 :root {
-    /* surface hierarchy: from lightest to darkest */
-    --color-surface-0: #f9f2e8;
-    --color-surface-1: #f5ede0;
-    --color-surface-2: #e8dbc8;
-    --color-surface-3: #d4c4ab;
-    --color-surface-4: #b8a088;
+    /* palette: every raw color, read only by the --color-* below, numbered from lightest to darkest per hue */
+    --palette-brown-0: #f9f2e8;
+    --palette-brown-1: #f5ede0;
+    --palette-brown-2: #e8dbc8;
+    --palette-brown-3: #d4c4ab;
+    --palette-brown-4: #b8a088;
+    --palette-brown-5: #9a7e6a;
+    --palette-brown-6: #7a5c42;
+    --palette-brown-7: #3d2c1e;
+    --palette-orange-0: #fee4da;
+    --palette-orange-1: #e8845a;
+    --palette-orange-2: #d46e44;
+    --palette-orange-3: #c05840;
+    --palette-red-0: #fecaca;
+    --palette-red-1: #e07878;
+    --palette-red-2: #cc5f5f;
+    --palette-red-3: #b84040;
+    --palette-red-4: #8f2f2f;
+    --palette-yellow-0: #fef3c2;
+    --palette-green-0: #e8f5ec;
+    --palette-green-1: #7a9448;
 
-    /* text hierarchy: from darkest to lightest */
-    --color-text-0: #3d2c1e;
-    --color-text-1: #7a5c42;
-    --color-text-2: #9a7e6a;
-    --color-text-3: #f9f2e8;
+    /* colors used everywhere else: --color-<where>-<meaning>-<n>
+       where: bg background, fg text, b border
+       meaning: omitted when neutral
+       n: 0 is the base, higher numbers move away from it */
 
-    /* validation error */
-    --color-text-error: #b07848;
+    /* background: from lightest to darkest */
+    --color-bg-0: var(--palette-brown-0);
+    --color-bg-1: var(--palette-brown-1);
+    --color-bg-2: var(--palette-brown-2);
+    --color-bg-3: var(--palette-brown-3);
+    --color-bg-4: var(--palette-brown-4);
+    --color-bg-action-0: var(--palette-orange-1);
+    --color-bg-action-1: var(--palette-orange-2);
+    --color-bg-danger-0: var(--palette-red-1);
+    --color-bg-danger-1: var(--palette-red-2);
+    --color-bg-danger-2: var(--palette-red-3);
 
-    /* action from lightest to darkest */
-    --color-action-0: #e8845a;
-    --color-action-1: #d46e44;
+    /* text: from darkest to lightest, inverse is text on colored backgrounds */
+    --color-fg-0: var(--palette-brown-7);
+    --color-fg-1: var(--palette-brown-6);
+    --color-fg-2: var(--palette-brown-5);
+    --color-fg-inverse: var(--palette-brown-0);
+    --color-fg-danger-0: var(--palette-red-4);
 
-    /* border highlight */
-    --color-border-0: #7a5c42;
+    /* border: 0 default, 1 stronger, 2 highlight on focus, hover and active, also the chart line */
+    --color-b-0: var(--palette-brown-3);
+    --color-b-1: var(--palette-brown-4);
+    --color-b-2: var(--palette-brown-6);
+    --color-b-action-0: var(--palette-orange-1);
+    --color-b-danger-0: var(--palette-red-2);
 
-    /* danger from lightest to darkest */
-    --color-danger-0: #e07878;
-    --color-danger-1: #cc5f5f;
-    --color-danger-2: #b84040;
-
-    /* toast */
-    --color-toast-positive: #7a9448;
-    --color-toast-negative: #c05840;
-
-    /* grade cell state backgrounds */
-    --color-grade-new: #e8f5ec;
-    --color-grade-updating: #fef3c2;
-    --color-grade-deleting: #fee4da;
-    --color-grade-error: #fecaca;
+    /* component only colors: --color-<component>-<where>-<meaning> */
+    --color-toast-bg-success: var(--palette-green-1);
+    --color-toast-bg-danger: var(--palette-orange-3);
+    --color-grade-bg-new: var(--palette-green-0);
+    --color-grade-bg-updating: var(--palette-yellow-0);
+    --color-grade-bg-deleting: var(--palette-orange-0);
+    --color-grade-bg-error: var(--palette-red-0);
 
     /* spacing scale */
     --space-0: 2px;
@@ -45,9 +68,9 @@
     --space-4: 24px;
     --space-5: 40px;
 
-    /* font weights; standard numeric scale: 400 normal, 500 medium, 600 semibold, 700 bold */
+    /* font weights, standard numeric scale: 400 normal, 500 medium, 600 semibold, 700 bold */
     --font-weight-medium: 500;
-    --font-weight-bold: 600;
+    --font-weight-semibold: 600;
 
     /* font sizes: absolute */
     --font-0: 10px;
@@ -57,7 +80,7 @@
     --font-4: 20px;
 
     /* font sizes, relative to parent (em)
-       em comes from typography: the width of the letter M, used as a reference unit.
+       em comes from typography: the width of the letter M, used as a reference unit
        in css it means the parent element's font-size
        example: 0.8em on a child of a 10px parent = 8px */
     --font-scale-0: 0.8em;
@@ -70,7 +93,7 @@
 
     /* shadows
        box-shadow: h-offset  v-offset  blur  spread  color
-       ─────────────────────────────────────────────────────
+       -----------------------------------------------------
        h-offset: left/right shift  (+ = right)
        v-offset: up/down shift     (+ = down)
        blur    : edge softness     (0 = sharp)
@@ -78,7 +101,7 @@
        color   : usually rgba for opacity control */
     --shadow: 0 0 10px rgba(0, 0, 0, .1);
 
-    /* z-index stack; only relative order matters, each level must be above the previous */
+    /* z-index stack, only relative order matters, each level must be above the previous */
     --z-index-0: 1;
     --z-index-1: 2;
 
@@ -86,7 +109,7 @@
     --duration-0: 0.2s;
     --duration-1: 1s;
 
-    /* opacity scale: from less to more opacity*/
+    /* opacity scale: from less to more opacity */
     --opacity-0: 0.5;
     --opacity-1: 0.7;
 
@@ -95,7 +118,9 @@
     --width-chart: 300px;
     --width-card: 360px;
 
-    /* horizontal centering pair; use together: left: var(--center) + translateX(var(--center-neg)) */
+    /* horizontal centering pair, use together: left: var(--center) + transform: translateX(var(--center-neg))
+       left 50% is half the parent's width: the element's left edge lands at the parent's middle
+       translateX -50% is half the element's own width: it slides back so its center is at the middle */
     --center: 50%;
     --center-neg: -50%;
 }

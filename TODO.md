@@ -1,9 +1,17 @@
-# current tasks
+# pending/future tasks
 
-# future tasks
+## pending
 
-- missing tests: backend has no coverage for auth, categories, students, and teachers routes
-- frontend has no component or composable tests (`useGrades`, `useToast`, `useConfirm`, and all vue components); highest-risk gap is the orchestration logic in `useGrades` (`cellStates`, `submitStudentGrades`)
-- per-request user load query: `load_user` runs a full `SELECT` on every authenticated request; add session-local caching if traffic grows
-- migrate to postgresql: add alembic for migrations (inline migration functions in `__init__.py` have no applied-state tracking and break on non-idempotent changes), convert `Grade.date` to `Mapped[datetime.date]`
-- migrate to typescript: typed props/emits, api response interfaces, and composable return types; vite supports ts out of the box
+- cloudflare tunnel deploy, both before the first deploy, per-ip limits (login included) need the real visitor ip:
+    - `nginx.conf`: replace `CLOUDFLARED_IP` in the disabled realip lines above `location /api/` and uncomment them
+    - `.env`: set `SESSION_COOKIE_SECURE=1`, session cookie only travels over https
+
+## future
+
+- arenas: tie teachers and students to arenas; today all teachers share every student, category and grade.
+- cache `load_user`: it runs a full `SELECT` on every authenticated request; worth it if traffic grows.
+- backend files with no tests:
+    - `app/__init__.py`, `db.py`, `auth.py`, `categories.py`, `students.py`, `teachers.py`, `seed.py`
+    - `decorators.py`, `payload.py`, `users.py`, `validation.py`
+- frontend files with no tests:
+    - `request.js`, `translateError.js`, `clickOutside.js`, `composables/`, `components/`, `layouts/` and `views/`

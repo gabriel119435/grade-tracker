@@ -1,27 +1,30 @@
-/* on narrow screens the top bar 3 columns (username | links | locale+logout) don't fit in one row.
+/* on narrow screens the top bar 3 columns (username | links | locale+logout) don't fit in one row
    800px gives enough room for a 25-char username + 3 nav tabs + locale selector + logout button
-   before any of them start touching each other's margins.
-   note: 800px cannot be extracted to a CSS custom property; the browser resolves @media conditions
-   before evaluating the cascade, so a var() inside @media would always be ignored. */
+   before any of them start touching each other's margins
+   800px can't be a css variable: the browser resolves @media conditions before the cascade, so var() is ignored */
 @media (max-width: 800px) {
     body {
         padding: 0 var(--space-2) var(--space-4);
     }
 
-    nav {
-        display: flex; /* override grid */
+    .top-bar {
+        /* overrides the desktop grid */
+        display: flex;
         flex-wrap: wrap;
-        row-gap: var(--space-2); /* gap only between rows; column gap is not needed here */
+        /* gap only between rows, no column gap needed */
+        row-gap: var(--space-2);
         padding: var(--space-2);
-        /* negative h-margin must match body padding so nav still bleeds edge-to-edge */
+        /* negative h-margin must match body padding so the top bar still bleeds edge-to-edge */
         margin: 0 calc(-1 * var(--space-2)) var(--space-3);
     }
 
     /* row 1: username centered, sized to content so the border never clips the text */
     .top-bar-left {
         width: max-content;
-        margin: 0 auto; /* centers a block element by giving equal auto margins on both sides */
-        order: 1; /* order controls visual position in flex without changing DOM order */
+        /* centers a block element by giving equal auto margins on both sides */
+        margin: 0 auto;
+        /* order sets the visual position in flex without changing dom order */
+        order: 1;
     }
 
     /* row 2: locale far left, logout far right */
@@ -42,19 +45,20 @@
         justify-content: center;
     }
 
-    /* stack create-teacher / create-student / change-password forms vertically;
-       max-content lets the form extend beyond viewport rather than clipping its inputs/buttons */
+    /* stack the create-teacher, create-student, create-category and change-password forms vertically
+       max-content lets the form extend beyond the viewport instead of clipping its inputs and buttons */
     .single-line-form {
         flex-direction: column;
         width: max-content;
     }
 
-    .single-line-form > * { /* > targets only direct children, not deeper descendants */
+    /* > targets only direct children, not deeper descendants */
+    .single-line-form > * {
         width: auto;
     }
 
-    /* cap full-width elements so they center like the login and category cards (both 360px fixed).
-       vertical-stack's align-items: center handles the centering automatically. */
+    /* cap full-width elements so they center like the login and list cards (both 360px fixed)
+       vertical-stack's align-items: center handles the centering */
     .history-card,
     .form-card {
         max-width: var(--width-card);
@@ -67,10 +71,7 @@
 
     .app-toast {
         font-size: var(--font-2);
-        white-space: normal; /* allow wrapping instead of overflowing viewport */
-        word-break: keep-all; /* only break at spaces, never mid-word or at hyphens */
-        overflow-wrap: break-word; /* fallback: break a word only if it has no spaces and would overflow */
-        max-width: calc(100vw - var(--space-3) * 2); /* vw = viewport width unit: 100vw = full screen width regardless of body padding; subtracts 16px on each side for breathing room */
+        /* 100vw = full screen width regardless of body padding, minus 16px breathing room on each side */
+        max-width: calc(100vw - var(--space-3) * 2);
     }
-
 }

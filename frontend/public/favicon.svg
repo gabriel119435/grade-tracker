@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
     <defs>
         <clipPath id="ball-circle">
-            <circle cx="16" cy="16" r="15"/>
+            <circle cx="16" cy="16" r="14"/>
         </clipPath>
     </defs>
 
-    <circle cx="16" cy="16" r="15" fill="#c8e63c"/>
+    <circle cx="16" cy="16" r="14" fill="#c8e600"/>
 
     <path d="M 16 1
            C 28 1, 28 16, 16 16
            C 4 16, 4 31, 16 31
            L 0 31 L 0 1"
-          fill="#f07820"
+          fill="#f07800"
           clip-path="url(#ball-circle)"/>
 
     <path d="M 16 1

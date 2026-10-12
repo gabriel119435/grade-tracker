@@ -6,7 +6,7 @@
     align-items: center;
 }
 
-/* header row containing a title and an optional action element; used in grade form and charts */
+/* header row with a title and an optional action element, used in grade form and charts */
 .grades-header {
     display: flex;
     justify-content: center;
@@ -18,7 +18,7 @@
 /* 'history' and 'add grades' texts */
 .grades-title {
     font-size: var(--font-4);
-    font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-semibold);
     white-space: nowrap;
 }
 
@@ -31,31 +31,33 @@
     align-items: center;
 }
 
-/* wide enough to always show 25 chars without scrolling.
+/* fits about 25 chars ("0" width), wide letters like W take more space
    border-box makes min-width include padding + border, so both must be added back:
    content = min-width - 2 * horizontal padding - 2 * border = exactly 25ch */
 .single-line-form input {
     min-width: calc(25ch + 2 * var(--space-3) + 2 * var(--border-width));
 }
 
-/* base card shell; structural properties shared by every card variant in the app */
+/* base card shell, structural properties shared by every card variant in the app */
 .list-card,
 .login-card,
 .form-card,
 .history-card,
 .category-card,
-.chart-card {
-    border: var(--border-width) solid; /* color set per variant via border-color */
+.chart-card,
+.category-block {
+    /* color set per variant via border-color */
+    border: var(--border-width) solid;
     border-radius: var(--border-radius-0);
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
 }
 
-/* shared card shell; category management cards and student/teacher list */
+/* list card: teacher list, student list, category management cards */
 .list-card {
-    background: var(--color-surface-2);
-    border-color: var(--color-surface-3);
+    background: var(--color-bg-2);
+    border-color: var(--color-b-0);
     padding: var(--space-2);
     width: var(--width-card);
     gap: var(--space-2);
@@ -81,9 +83,14 @@
 .item-row {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* if only 2 items, pushes first item to left, last item to right */
+    /* with only 2 items, pushes the first to the left and the last to the right */
+    justify-content: space-between;
     gap: var(--space-3);
     font-size: var(--font-2);
-    white-space: nowrap;
+}
+
+/* names: wrap at spaces, a word longer than the line breaks anywhere, so it never widens its container */
+.wrap-name {
+    overflow-wrap: anywhere;
 }
 

@@ -1,6 +1,10 @@
 # auto-generated
-__pycache__/
+**/__pycache__/
 .pytest_cache/
+.ruff_cache/
+
+# os
+**/.DS_Store
 
 # tooling
 .venv
@@ -10,6 +14,3 @@ app.db
 
 # secrets
 .env
-
-# repo files
-.gitignore

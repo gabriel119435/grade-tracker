@@ -2,9 +2,6 @@ import {ref} from 'vue'
 
 const CONFIRM_TIMEOUT_MS = 3000
 
-// module-level singleton: only one delete button can be in pending state at a time app-wide
-
-// int for user id, str for cat or subcat id like 'cat-3' or 'sub-3'
 const pendingId = ref(null)
 let timer = null
 
@@ -13,15 +10,19 @@ export function useConfirm() {
         if (pendingId.value === id) {
             clearTimeout(timer)
             pendingId.value = null
-            return true  // second click, confirmed
+            return true
         }
         clearTimeout(timer)
         pendingId.value = id
         timer = setTimeout(() => {
             pendingId.value = null
         }, CONFIRM_TIMEOUT_MS)
-        return false  // first click, pending
+        return false
     }
 
+    // destructive actions (delete, seed) need two clicks on the same button, so a misclick does nothing
+    // single pendingId for the whole app, one button pending at a time, cleared after 3s
+    // confirm(id) false on first click, true on second click of same id (user_id, 'cat-3', 'sub-3', 'seed')
+    // read `pendingId` to show the confirm style, write via `confirm()`
     return {pendingId, confirm}
 }

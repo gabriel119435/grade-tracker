@@ -1,32 +1,30 @@
-/* fixed bottom-center pill; auto-dismissed after 4s via useToast composable */
+/* fixed bottom-center pill */
 .app-toast {
     position: fixed;
     bottom: var(--space-4);
 
-    /* no single "center" property exists for fixed elements:
-       left: 50% moves the left edge to the viewport midpoint;
-       translateX(-50%) shifts back by half the element's own width */
+    /* horizontal centering, see --center in variables.css */
     left: var(--center);
     transform: translateX(var(--center-neg));
 
     padding: var(--space-3) var(--space-4);
     border-radius: var(--border-radius-1);
     font-size: var(--font-3);
-    color: var(--color-text-3);
+    color: var(--color-fg-inverse);
 
-    /* pre-line: collapses whitespace like normal but preserves \n as a line break,
-       allowing multi-line toasts by passing "\n" in the message string */
+    /* each \n starts a new line (teacher GradesView joins saved and deleted lines), long lines still wrap */
     white-space: pre-line;
 
-    z-index: var(--z-index-1); /* above dropdown and all other content */
+    /* above the dropdown list and all other content */
+    z-index: var(--z-index-1);
 }
 
 .app-toast--success {
-    background: var(--color-toast-positive);
+    background: var(--color-toast-bg-success);
 }
 
 .app-toast--error {
-    background: var(--color-toast-negative);
+    background: var(--color-toast-bg-danger);
 }
 
 /* fade in on mount, fade out on dismiss */
@@ -35,9 +33,8 @@
     transition: opacity var(--duration-1);
 }
 
-/* vue transition hooks: enter-from is the initial state before fade-in starts;
-   leave-to is the final state after fade-out ends, both set opacity: 0
-   so the toast appears from invisible and disappears back to invisible */
+/* <Transition name="toast"> in AppToast.vue adds these classes:
+   enter-from is the state before fade-in, leave-to the state after fade-out, both invisible */
 .toast-enter-from,
 .toast-leave-to {
     opacity: 0;

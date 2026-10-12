@@ -1,23 +1,23 @@
-/* every element on the page; resets browser defaults */
+/* every element on the page, resets browser defaults */
 * {
-    box-sizing: border-box; /* width and height include padding and border, not just content */
-    margin: 0; /* headers: default <h2> has margins */
-    padding: 0; /* bullet points: default <ul> has left padding */
-    user-select: none; /* prevents text selection */
-    -webkit-user-select: none; /* prevents text selection safari */
-}
-
-ul {
-    list-style: none; /* removes dots on lists */
+    /* width and height include padding and border, not just content */
+    box-sizing: border-box;
+    /* browser default margins and paddings, ex: <h2> margins, <ul> left padding */
+    margin: 0;
+    padding: 0;
+    /* no text selection on purpose, app-like ui, webkit for safari */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
-    font-family: system-ui, sans-serif; /* OS native font: SF Pro on Mac, Segoe UI on Windows */
+    /* os native font: SF Pro on mac, Segoe UI on windows */
+    font-family: system-ui, sans-serif;
     font-size: var(--font-2);
-    color: var(--color-text-0);
-    background: var(--color-surface-0);
-    margin: 0 auto; /* 0 top/bottom, auto left/right; centers the body horizontally */
-    padding: 0 var(--space-4) var(--space-4); /* top horizontal bottom; top is zero because topbar already has margin-bottom */
-    text-align: center; /* centers inline content: headings, labels, nav links */
+    color: var(--color-fg-0);
+    background: var(--color-bg-0);
+    /* top horizontal bottom, top is zero because the top bar has its own margin-bottom */
+    padding: 0 var(--space-4) var(--space-4);
+    /* centers inline content: headings, labels, nav links */
+    text-align: center;
 }
-

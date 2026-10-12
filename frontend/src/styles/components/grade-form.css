@@ -1,0 +1,53 @@
+/* card wrapping the entire grade input form */
+.form-card {
+    background: var(--color-bg-2);
+    border-color: var(--color-b-0);
+    padding: var(--space-3);
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* date label and input grouped together, sits inside form-card so one step darker */
+.date-field {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    background: var(--color-bg-3);
+    border: var(--border-width) solid var(--color-b-1);
+    border-radius: var(--border-radius-0);
+    padding: var(--space-1) var(--space-3);
+}
+
+/* "date" label to the left of the date input */
+.date-field label {
+    color: var(--color-fg-2);
+    white-space: nowrap;
+}
+
+/* full width forces the date error onto its own row inside the wrapping .date-field */
+.date-field .field-error {
+    width: 100%;
+}
+
+/* card for each category and its subcategory inputs, sits inside form-card so one step darker */
+.category-block {
+    background: var(--color-bg-3);
+    border-color: var(--color-b-1);
+    padding: var(--space-3);
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* each subcategory column: label on top, input below */
+.subcategory-input-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* subcategory name label above the input */
+.subcategory-input-column label {
+    font-size: var(--font-scale-0);
+}

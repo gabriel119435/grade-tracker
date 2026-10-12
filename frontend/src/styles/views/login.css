@@ -1,18 +1,16 @@
 /* login page, centers the card on the viewport via fixed positioning */
 .login-page {
     position: fixed;
-    /* top|left put the element's top-left corner at the viewport center;
-       translate(-50%, -50%) shifts it back by half its own width and height,
-       so the element's center aligns with the viewport center */
+    /* centering on both axes, see --center in variables.css */
     top: var(--center);
     left: var(--center);
     transform: translate(var(--center-neg), var(--center-neg));
 }
 
-/* contained form box with shadow; login page */
+/* contained form box with shadow, login page */
 .login-card {
-    background: var(--color-surface-1);
-    border-color: var(--color-surface-3);
+    background: var(--color-bg-1);
+    border-color: var(--color-b-0);
     padding: var(--space-5);
     width: var(--width-card);
     gap: var(--space-4);
@@ -33,17 +31,18 @@
 /* inputs spanning the full card width */
 .login-card input {
     width: 100%;
-    display: block; /* inputs are inline-block by default; block makes width: 100% stretch to fill */
+    /* inputs are inline-block by default, block makes width: 100% stretch to fill */
+    display: block;
 }
 
 /* login button spanning the full card width */
 .login-card button {
     width: 100%;
-    margin-top: var(--space-1); /* small gap between last input and button */
+    /* extra space above the button, on top of the form's gap */
+    margin-top: var(--space-1);
 }
 
-/* error message shown below the form on failed login */
-.login-error {
+/* error messages inside the login card are smaller than body text */
+.login-card .field-error {
     font-size: var(--font-1);
-    color: var(--color-danger-1);
 }

@@ -4,5 +4,5 @@ dist/
 # tooling
 node_modules/
 
-# repo files
-.gitignore
+# os
+**/.DS_Store

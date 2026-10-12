@@ -1,118 +1,104 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, ref, useTemplateRef} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {changeAdminPassword} from '../../api/routes/auth.js'
 import {createTeacher, deleteTeacher, getTeachers} from '../../api/routes/teachers.js'
 import {seedDatabase} from '../../api/routes/seed.js'
 import {useLoading} from '../../composables/generic/useLoading.js'
 import {useToast} from '../../composables/generic/useToast.js'
+import {useAction} from '../../composables/generic/useAction.js'
 import {useConfirm} from '../../composables/generic/useConfirm.js'
 import {translateError} from '../../utils/translateError.js'
-import {hasLeadingOrTrailingSpaces, isTooShort} from '../../utils/credentialValidation.js'
+import {isPasswordTooShort} from '../../utils/inputValidation.js'
+import {LIMIT_PARAMS, PASSWORD_MAX_LENGTH} from '../../constants.js'
+import UserList from '../../components/UserList.vue'
 
 const {t} = useI18n()
-const teachers = ref([]) // [{id: 1, username: 'alice', grade_count: 42}]
-const teacherUsername = ref('')
-const teacherPassword = ref('')
-const teacherUsernameError = computed(() => hasLeadingOrTrailingSpaces(teacherUsername.value)) // true if username has leading or trailing spaces
-const teacherPasswordError = computed(() => isTooShort(teacherPassword.value)) // true if password is non-empty but under 8 chars
+
+// api functions handed to UserList
+const teacherApi = {get: getTeachers, create: createTeacher, remove: deleteTeacher}
+
+// the UserList instance, its load() refreshes the teacher list after a seed
+const userList = useTemplateRef('userList')
+
 const adminOldPassword = ref('')
 const adminNewPassword = ref('')
-const {loading, withLoading} = useLoading() // loading true while any request is in flight, withLoading wraps async calls
+
+// live input check, shows its .field-error line and disables its submit button
+const adminNewPasswordError = computed(() => isPasswordTooShort(adminNewPassword.value))
+
+// shared with UserList: one action at a time across the whole page
+const loader = useLoading()
+const {loading, withLoading} = loader
 const {toast} = useToast()
-const {pendingId, confirm} = useConfirm() // pendingId is id awaiting confirmation, confirm(id): returns false on first click, true on second
-
-async function load() {
-  const data = await getTeachers()
-  if (!data.error) teachers.value = data
-}
-
-onMounted(load)
-
-async function handleCreateTeacher() {
-  await withLoading(async () => {
-    const data = await createTeacher(teacherUsername.value, teacherPassword.value)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      teacherUsername.value = ''
-      teacherPassword.value = ''
-      await load()
-    }
-  })
-}
-
-async function handleDelete(id) {
-  if (!confirm(id)) return
-  await withLoading(async () => {
-    const data = await deleteTeacher(id)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      await load()
-    }
-  })
-}
+const {runAction} = useAction(withLoading)
+const {pendingId, confirm} = useConfirm()
 
 async function handleChangePassword() {
-  await withLoading(async () => {
-    const data = await changeAdminPassword(adminOldPassword.value, adminNewPassword.value)
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      adminOldPassword.value = ''
-      adminNewPassword.value = ''
-      toast(t('teachers.password_changed'))
-    }
+  await runAction(() => changeAdminPassword(adminOldPassword.value, adminNewPassword.value), () => {
+    adminOldPassword.value = ''
+    adminNewPassword.value = ''
+    toast(t('teachers.password_changed'))
   })
 }
 
 async function handleSeed() {
   if (!confirm('seed')) return
-  await withLoading(async () => {
-    const data = await seedDatabase()
-    if (data.error) {
-      toast(translateError(data.error), 'error')
-    } else {
-      toast(t('teachers.seed_done', data))
-      await load()
-    }
+  await runAction(seedDatabase, async (data) => {
+    toast(t('teachers.seed_done', data))
+    await userList.value.load()
   })
 }
 </script>
 
 <template>
   <div class="vertical-stack">
-    <form class="single-line-form" @submit.prevent="handleCreateTeacher">
-      <input v-model="teacherUsername" :placeholder="t('common.username')" maxlength="25" required/>
-      <input v-model="teacherPassword" :placeholder="t('common.password')" maxlength="25" required/>
-      <button :disabled="loading || teacherUsernameError || teacherPasswordError" class="btn-primary" type="submit">
-        {{ t('teachers.create') }}
+    <UserList
+      ref="userList"
+      :api="teacherApi"
+      i18n-prefix="teachers"
+      :loader="loader"
+    />
+
+    <form
+      class="single-line-form"
+      @submit.prevent="handleChangePassword"
+    >
+      <input
+        v-model="adminOldPassword"
+        type="password"
+        required
+        :placeholder="t('teachers.current_password')"
+        :maxlength="PASSWORD_MAX_LENGTH"
+      />
+      <input
+        v-model="adminNewPassword"
+        type="password"
+        required
+        :placeholder="t('teachers.new_password', LIMIT_PARAMS)"
+        :maxlength="PASSWORD_MAX_LENGTH"
+      />
+      <button
+        class="btn-primary"
+        type="submit"
+        :disabled="loading || adminNewPasswordError"
+      >
+        {{ t('teachers.change_password') }}
       </button>
     </form>
-    <span v-if="teacherUsernameError" class="field-error">{{ t('common.username_spaces') }}</span>
-    <span v-if="teacherPasswordError" class="field-error">{{ t('common.password_too_short') }}</span>
-    <div v-if="teachers.length" class="list-card">
-      <div v-for="teacher in teachers" :key="teacher.id" class="item-row">
-        <div class="user-info">
-          <strong>{{ teacher.username }}</strong>
-          <span class="user-count">{{ t('teachers.grade_count', {n: teacher.grade_count}) }}</span>
-        </div>
-        <button :disabled="loading" :class="pendingId === teacher.id ? 'btn-danger-confirm' : 'btn-danger'"
-                @click="handleDelete(teacher.id)">
-          {{ pendingId === teacher.id ? t('common.confirmation') : t('common.delete') }}
-        </button>
-      </div>
-    </div>
+    <span
+      v-if="adminNewPasswordError"
+      class="field-error"
+    >
+      {{ translateError('password_too_short') }}
+    </span>
 
-    <form class="single-line-form" @submit.prevent="handleChangePassword">
-      <input v-model="adminOldPassword" :placeholder="t('teachers.current_password')" maxlength="25" required type="password"/>
-      <input v-model="adminNewPassword" :placeholder="t('teachers.new_password')" maxlength="25" required
-             type="password"/>
-      <button :disabled="loading" class="btn-primary" type="submit">{{ t('teachers.change_password') }}</button>
-    </form>
-
-    <button :disabled="loading" :class="pendingId === 'seed' ? 'btn-danger-confirm' : 'btn-danger'" @click="handleSeed">
+    <button
+      :class="pendingId === 'seed' ? 'btn-danger-confirm' : 'btn-danger'"
+      type="button"
+      :disabled="loading"
+      @click="handleSeed"
+    >
       {{ pendingId === 'seed' ? t('common.confirmation') : t('teachers.seed') }}
     </button>
   </div>

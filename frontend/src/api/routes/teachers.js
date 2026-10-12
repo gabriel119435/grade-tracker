@@ -5,9 +5,7 @@ export async function getTeachers() {
 }
 
 export async function createTeacher(username, password) {
-    return request('/api/teachers', {
-        method: 'POST', body: JSON.stringify({username, password})
-    })
+    return request('/api/teachers', {method: 'POST', body: JSON.stringify({username, password})})
 }
 
 export async function deleteTeacher(id) {

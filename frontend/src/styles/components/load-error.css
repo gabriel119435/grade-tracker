@@ -1,0 +1,5 @@
+/* failed load shown inside the card the data would fill: message and retry button centered */
+.load-error {
+    align-items: center;
+    text-align: center;
+}
