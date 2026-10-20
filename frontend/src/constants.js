@@ -20,5 +20,4 @@ export const LIMIT_PARAMS = {
 }
 
 // grade history sizes offered by the limit buttons, default first
-// all values must be > 1, i18n uses plural-only words
 export const GRADE_HISTORY_LIMITS = [5, 10, 30]

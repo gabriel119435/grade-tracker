@@ -10,7 +10,8 @@ export async function logout() {
 
 export async function changeAdminPassword(oldPassword, newPassword) {
     return request('/api/admin/password', {
-        method: 'PATCH', body: JSON.stringify({old_password: oldPassword, new_password: newPassword})
+        method: 'PATCH',
+        body: JSON.stringify({old_password: oldPassword, new_password: newPassword}),
     })
 }
 

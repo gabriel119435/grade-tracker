@@ -5,6 +5,9 @@
 @media (max-width: 800px) {
     body {
         padding: 0 var(--space-2) var(--space-4);
+        /* min-width = --width-card (.list-card in structure.css) + 2 * --space-2 (body padding above) = 376px
+           a narrower screen scrolls the whole page, top bar included, instead of cutting the card's left edge */
+        min-width: calc(var(--width-card) + 2 * var(--space-2));
     }
 
     .top-bar {

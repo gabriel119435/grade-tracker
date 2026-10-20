@@ -10,11 +10,11 @@ import random
 from datetime import date, timedelta
 
 from flask import Blueprint, jsonify
-from sqlalchemy import delete, insert
+from sqlalchemy import insert
 from werkzeug.security import generate_password_hash
 
 from app.db import get_session
-from app.models import Category, Grade, Subcategory, User
+from app.models import Category, Grade, Subcategory, User, wipe
 from app.routes.helpers.decorators import require_role
 
 seed_bp = Blueprint("seed", __name__)
@@ -27,13 +27,49 @@ GRADED_STUDENT_COUNT = 5
 # 10 male + 10 female first names, 20 last names, pt-br spelling
 FIRST_NAMES = [
     # male
-    "josé", "joão", "antônio", "francisco", "pedro", "carlos", "lucas", "luiz", "paulo", "gabriel",
+    "josé",
+    "joão",
+    "antônio",
+    "francisco",
+    "pedro",
+    "carlos",
+    "lucas",
+    "luiz",
+    "paulo",
+    "gabriel",
     # female
-    "maria", "ana", "francisca", "júlia", "antônia", "juliana", "adriana", "fernanda", "márcia", "patrícia",
+    "maria",
+    "ana",
+    "francisca",
+    "júlia",
+    "antônia",
+    "juliana",
+    "adriana",
+    "fernanda",
+    "márcia",
+    "patrícia",
 ]
 LAST_NAMES = [
-    "silva", "santos", "oliveira", "souza", "pereira", "ferreira", "lima", "alves", "rodrigues", "costa",
-    "sousa", "gomes", "nascimento", "araújo", "ribeiro", "almeida", "jesus", "barbosa", "soares", "carvalho",
+    "silva",
+    "santos",
+    "oliveira",
+    "souza",
+    "pereira",
+    "ferreira",
+    "lima",
+    "alves",
+    "rodrigues",
+    "costa",
+    "sousa",
+    "gomes",
+    "nascimento",
+    "araújo",
+    "ribeiro",
+    "almeida",
+    "jesus",
+    "barbosa",
+    "soares",
+    "carvalho",
 ]
 
 # category -> subcategories, 50 subcats in total so the grade tier percentages split evenly
@@ -84,25 +120,13 @@ def run_seed():
     }
 
 
-def wipe(session):
-    # deletes all grades, subcategories, categories and non admin users, children first.
-    session.execute(delete(Grade))
-    session.execute(delete(Subcategory))
-    session.execute(delete(Category))
-    session.execute(delete(User).where(User.username != "admin"))
-
-
 def _create_users(session):
     # creates teachers and students with random unique names, all sharing SEED_PASS.
     password_hash = generate_password_hash(SEED_PASS)
     names = _random_names(TEACHER_COUNT + STUDENT_COUNT)
 
-    teachers = [
-        User(username=n, password_hash=password_hash, role="teacher") for n in names[:TEACHER_COUNT]
-    ]
-    students = [
-        User(username=n, password_hash=password_hash, role="student") for n in names[TEACHER_COUNT:]
-    ]
+    teachers = [User(username=n, password_hash=password_hash, role="teacher") for n in names[:TEACHER_COUNT]]
+    students = [User(username=n, password_hash=password_hash, role="student") for n in names[TEACHER_COUNT:]]
     session.add_all(teachers + students)
     session.flush()  # assigns ids
 
@@ -146,7 +170,7 @@ def _create_grades(session, teacher_ids, student_ids, subcat_ids):
 
         start = 0
         for size, (_, grade_count) in zip(sizes, GRADE_TIERS):
-            for subcat_id in shuffled_subcat_ids[start:start + size]:
+            for subcat_id in shuffled_subcat_ids[start : start + size]:
                 # distinct days: one grade per student per subcat per day is a unique constraint
                 for day in random.sample(all_days, grade_count):
                     rows.append(
@@ -155,7 +179,7 @@ def _create_grades(session, teacher_ids, student_ids, subcat_ids):
                             "date": day,
                             "student_id": student_id,
                             "teacher_id": teacher_id,
-                            "subcategory_id": subcat_id
+                            "subcategory_id": subcat_id,
                         }
                     )
             start += size

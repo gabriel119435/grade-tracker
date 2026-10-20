@@ -47,7 +47,7 @@ const {chartGrades, chartGradesReady, chartGradesFailed, loadChartGrades} = useC
 const limit = ref(GRADE_HISTORY_LIMITS[0])
 
 // AppDropdown options: [{value: 1, label: 'alice'}]
-const studentOptions = computed(() => students.value.map(s => ({value: s.id, label: s.username})))
+const studentOptions = computed(() => students.value.map((s) => ({value: s.id, label: s.username})))
 
 // both lists are needed: no students means nothing to pick, no categories means a form without cells
 function loadLists() {
@@ -66,8 +66,8 @@ async function loadStudent(id) {
 async function handleSubmit() {
   await runAction(submitStudentGrades, async (result) => {
     const lines = []
-    if (result.upserted > 0) lines.push(t('grades.saved', {n: result.upserted}))
-    if (result.deleted > 0) lines.push(t('grades.deleted', {n: result.deleted}))
+    if (result.upserted > 0) lines.push(t('grades.saved', result.upserted))
+    if (result.deleted > 0) lines.push(t('grades.deleted', result.deleted))
     toast(lines.join('\n'))
 
     // reloads after save to keep charts and cells in sync with the backend
@@ -89,59 +89,58 @@ watch(showForm, (open) => {
 </script>
 
 <template>
-  <LoadError
-    v-if="listsFailed"
-    class="list-card"
-    :message="t('grades.lists_failed')"
-    @retry="loadLists"
-  />
-  <div
-    v-else
-    class="vertical-stack"
-  >
-    <div class="selector-row">
-      <AppDropdown
-        v-model="selectedStudentId"
-        :options="studentOptions"
-        :placeholder="t('grades.select_student')"
-      />
-      <button
+  <div class="vertical-stack">
+    <LoadError
+      v-if="listsFailed"
+      class="list-card"
+      :message="t('grades.lists_failed')"
+      @retry="loadLists"
+    />
+    <template v-else>
+      <div class="selector-row">
+        <AppDropdown
+          v-model="selectedStudentId"
+          :options="studentOptions"
+          :placeholder="t('grades.select_student')"
+        />
+        <button
+          v-if="selectedStudentId"
+          class="btn-ghost"
+          type="button"
+          @click="showForm = !showForm"
+        >
+          {{ showForm ? t('grades.hide_form') : t('grades.add') }}
+        </button>
+      </div>
+
+      <div
         v-if="selectedStudentId"
-        class="btn-ghost"
-        type="button"
-        @click="showForm = !showForm"
+        class="vertical-stack"
       >
-        {{ showForm ? t('grades.hide_form') : t('grades.add') }}
-      </button>
-    </div>
+        <GradeForm
+          v-if="showForm"
+          v-model:input-grade-date="inputGradeDate"
+          :categories="categories"
+          :cell-texts="cellTexts"
+          :cell-states="cellStates"
+          :loading="loading"
+          :has-grade-errors="hasGradeErrors"
+          :has-changes="hasChanges"
+          :saved-day-grades-ready="savedDayGradesReady"
+          :saved-day-grades-failed="savedDayGradesFailed"
+          @edit="(id, text) => (cellTexts[id] = text)"
+          @submit="handleSubmit"
+          @retry="loadStudentDayGrades(selectedStudentId)"
+        />
 
-    <div
-      v-if="selectedStudentId"
-      class="vertical-stack"
-    >
-      <GradeForm
-        v-if="showForm"
-        v-model:input-grade-date="inputGradeDate"
-        :categories="categories"
-        :cell-texts="cellTexts"
-        :cell-states="cellStates"
-        :loading="loading"
-        :has-grade-errors="hasGradeErrors"
-        :has-changes="hasChanges"
-        :saved-day-grades-ready="savedDayGradesReady"
-        :saved-day-grades-failed="savedDayGradesFailed"
-        @edit="(id, text) => cellTexts[id] = text"
-        @submit="handleSubmit"
-        @retry="loadStudentDayGrades(selectedStudentId)"
-      />
-
-      <GradeCharts
-        v-model:limit="limit"
-        :grades="chartGrades"
-        :ready="chartGradesReady"
-        :failed="chartGradesFailed"
-        @retry="loadChartGrades(selectedStudentId, limit)"
-      />
-    </div>
+        <GradeCharts
+          v-model:limit="limit"
+          :grades="chartGrades"
+          :ready="chartGradesReady"
+          :failed="chartGradesFailed"
+          @retry="loadChartGrades(selectedStudentId, limit)"
+        />
+      </div>
+    </template>
   </div>
 </template>

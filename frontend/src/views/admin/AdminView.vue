@@ -7,11 +7,11 @@ import {seedDatabase} from '../../api/routes/seed.js'
 import {useLoading} from '../../composables/generic/useLoading.js'
 import {useToast} from '../../composables/generic/useToast.js'
 import {useAction} from '../../composables/generic/useAction.js'
-import {useConfirm} from '../../composables/generic/useConfirm.js'
 import {translateError} from '../../utils/translateError.js'
 import {isPasswordTooShort} from '../../utils/inputValidation.js'
 import {LIMIT_PARAMS, PASSWORD_MAX_LENGTH} from '../../constants.js'
 import UserList from '../../components/UserList.vue'
+import ConfirmButton from '../../components/ConfirmButton.vue'
 
 const {t} = useI18n()
 
@@ -32,20 +32,23 @@ const loader = useLoading()
 const {loading, withLoading} = loader
 const {toast} = useToast()
 const {runAction} = useAction(withLoading)
-const {pendingId, confirm} = useConfirm()
 
 async function handleChangePassword() {
-  await runAction(() => changeAdminPassword(adminOldPassword.value, adminNewPassword.value), () => {
-    adminOldPassword.value = ''
-    adminNewPassword.value = ''
-    toast(t('teachers.password_changed'))
-  })
+  await runAction(
+    () => changeAdminPassword(adminOldPassword.value, adminNewPassword.value),
+    () => {
+      adminOldPassword.value = ''
+      adminNewPassword.value = ''
+      toast(t('teachers.password_changed'))
+    },
+  )
 }
 
 async function handleSeed() {
-  if (!confirm('seed')) return
   await runAction(seedDatabase, async (data) => {
-    toast(t('teachers.seed_done', data))
+    // short placeholders keep seed_done under 120 chars in the locale files
+    const counts = {t: data.teachers, s: data.students, c: data.categories, sc: data.subcategories, g: data.grades}
+    toast(t('teachers.seed_done', counts))
     await userList.value.load()
   })
 }
@@ -93,13 +96,11 @@ async function handleSeed() {
       {{ translateError('password_too_short') }}
     </span>
 
-    <button
-      :class="pendingId === 'seed' ? 'btn-danger-confirm' : 'btn-danger'"
-      type="button"
+    <ConfirmButton
+      confirm-id="seed"
+      :label="t('teachers.seed')"
       :disabled="loading"
-      @click="handleSeed"
-    >
-      {{ pendingId === 'seed' ? t('common.confirmation') : t('teachers.seed') }}
-    </button>
+      @confirm="handleSeed"
+    />
   </div>
 </template>

@@ -8,7 +8,7 @@ const {t} = useI18n()
 
 <template>
   <div class="btn-group">
-    <span class="btn-group-label">{{ t('charts.last') }}</span>
+    <span class="btn-group-label">{{ t('charts.last', model) }}</span>
     <button
       v-for="n in GRADE_HISTORY_LIMITS"
       :key="n"

@@ -6,14 +6,14 @@ import {
   createSubcategory,
   deleteCategory,
   deleteSubcategory,
-  getCategories
+  getCategories,
 } from '../../api/routes/categories.js'
 import {useLoading} from '../../composables/generic/useLoading.js'
 import {useAction} from '../../composables/generic/useAction.js'
-import {useConfirm} from '../../composables/generic/useConfirm.js'
 import {useListLoad} from '../../composables/generic/useListLoad.js'
 import {NAME_MAX_LENGTH} from '../../constants.js'
 import LoadError from '../../components/LoadError.vue'
+import ConfirmButton from '../../components/ConfirmButton.vue'
 
 const {t} = useI18n()
 // categories: [{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}]
@@ -28,32 +28,34 @@ const newSubcategoryNames = ref({})
 
 const {loading, withLoading} = useLoading()
 const {runAction} = useAction(withLoading)
-const {pendingId, confirm} = useConfirm()
 
 onMounted(load)
 
 async function handleCreateCategory() {
-  await runAction(() => createCategory(newCategoryName.value), async () => {
-    newCategoryName.value = ''
-    await load()
-  })
+  await runAction(
+    () => createCategory(newCategoryName.value),
+    async () => {
+      newCategoryName.value = ''
+      await load()
+    },
+  )
 }
 
-// 'cat-' and 'sub-' prefixes keep category and subcategory ids apart in the shared pendingId
 async function handleDeleteCategory(id) {
-  if (!confirm('cat-' + id)) return
   await runAction(() => deleteCategory(id), load)
 }
 
 async function handleCreateSubcategory(categoryId) {
-  await runAction(() => createSubcategory(newSubcategoryNames.value[categoryId], categoryId), async () => {
-    newSubcategoryNames.value[categoryId] = ''
-    await load()
-  })
+  await runAction(
+    () => createSubcategory(newSubcategoryNames.value[categoryId], categoryId),
+    async () => {
+      newSubcategoryNames.value[categoryId] = ''
+      await load()
+    },
+  )
 }
 
 async function handleDeleteSubcategory(id) {
-  if (!confirm('sub-' + id)) return
   await runAction(() => deleteSubcategory(id), load)
 }
 </script>
@@ -96,14 +98,12 @@ async function handleDeleteSubcategory(id) {
       >
         <div class="category-header">
           <strong class="wrap-name">{{ cat.name }}</strong>
-          <button
-            :class="pendingId === 'cat-' + cat.id ? 'btn-danger-confirm' : 'btn-danger'"
-            type="button"
+          <!-- 'cat-' and 'sub-' prefixes keep category and subcategory ids apart in the shared pendingId -->
+          <ConfirmButton
+            :confirm-id="'cat-' + cat.id"
             :disabled="loading"
-            @click="handleDeleteCategory(cat.id)"
-          >
-            {{ pendingId === 'cat-' + cat.id ? t('common.confirmation') : t('common.delete') }}
-          </button>
+            @confirm="handleDeleteCategory(cat.id)"
+          />
         </div>
 
         <div
@@ -112,14 +112,11 @@ async function handleDeleteSubcategory(id) {
           class="item-row"
         >
           <span class="wrap-name">{{ sub.name }}</span>
-          <button
-            :class="pendingId === 'sub-' + sub.id ? 'btn-danger-confirm' : 'btn-danger'"
-            type="button"
+          <ConfirmButton
+            :confirm-id="'sub-' + sub.id"
             :disabled="loading"
-            @click="handleDeleteSubcategory(sub.id)"
-          >
-            {{ pendingId === 'sub-' + sub.id ? t('common.confirmation') : t('common.delete') }}
-          </button>
+            @confirm="handleDeleteSubcategory(sub.id)"
+          />
         </div>
 
         <form @submit.prevent="handleCreateSubcategory(cat.id)">

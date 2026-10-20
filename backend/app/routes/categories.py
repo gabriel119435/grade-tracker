@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, abort
+from flask import Blueprint, abort, jsonify
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
@@ -29,7 +29,8 @@ def get_categories():
                 "name": c.name,
                 # already sorted by subcat.id in models.py cat's definition
                 "subcategories": [{"id": s.id, "name": s.name} for s in c.subcategories],
-            } for c in categories
+            }
+            for c in categories
         ]
     )
 

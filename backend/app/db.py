@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, event, text
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # backend/app/db.py -> backend/
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
 
 DB_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
-# journal_mode is sqlite's default delete: reads see the last commit while a write is open, a commit waits for open reads
+# journal_mode is sqlite's default delete: reads see the last commit during a write, a commit waits for open reads
 # a wait longer than 5s (pysqlite default timeout) fails with "database is locked"
 
 # conftest.py sets DATABASE_URL to sqlite:///:memory:
@@ -47,9 +47,7 @@ def reset_query_only(dbapi_conn, _):
         dbapi_conn.execute("PRAGMA query_only = OFF")
 
 
-SessionLocal = sessionmaker(
-    bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
-)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False)
 
 
 @contextmanager

@@ -59,7 +59,7 @@ cp .env.example .env
 
 | role    | lands on              | can do                                                        |
 |---------|-----------------------|---------------------------------------------------------------|
-| admin   | `/admin/teachers`     | create and delete teacher accounts, change own password, seed |
+| admin   | `/admin`              | create and delete teacher accounts, change own password, seed |
 | teacher | `/teacher/categories` | manage categories, students, and grades                       |
 | student | `/student`            | view own grades as charts                                     |
 

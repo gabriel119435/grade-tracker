@@ -3,9 +3,13 @@
     position: fixed;
     bottom: var(--space-4);
 
-    /* horizontal centering, see --center in variables.css */
-    left: var(--center);
-    transform: translateX(var(--center-neg));
+    /* left 0 + right 0 + auto margins: centered, the whole viewport width is free before wrapping */
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: max-content;
+    /* never narrower than its longest word, wins over the mobile.css max-width */
+    min-width: min-content;
 
     padding: var(--space-3) var(--space-4);
     border-radius: var(--border-radius-1);

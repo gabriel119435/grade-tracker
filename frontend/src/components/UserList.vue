@@ -3,14 +3,14 @@ import {computed, onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useLoading} from '../composables/generic/useLoading.js'
 import {useAction} from '../composables/generic/useAction.js'
-import {useConfirm} from '../composables/generic/useConfirm.js'
 import {useListLoad} from '../composables/generic/useListLoad.js'
 import {translateError} from '../utils/translateError.js'
 import {hasLeadingOrTrailingSpaces, isNameWordTooLong, isPasswordTooShort} from '../utils/inputValidation.js'
 import {PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../constants.js'
 import LoadError from './LoadError.vue'
+import ConfirmButton from './ConfirmButton.vue'
 
-// create form, live checks, list and two-click delete of one user role, shared by TeachersView and StudentsView
+// create form, live checks, list and two-click delete of one user role, shared by AdminView and StudentsView
 
 const props = defineProps({
   // api functions of the listed role: {get: getStudents, create: createStudent, remove: deleteStudent}
@@ -36,24 +36,25 @@ const passwordError = computed(() => isPasswordTooShort(password.value))
 
 const {loading, withLoading} = props.loader ?? useLoading()
 const {runAction} = useAction(withLoading)
-const {pendingId, confirm} = useConfirm()
 
 onMounted(load)
 
 async function handleCreate() {
-  await runAction(() => props.api.create(username.value, password.value), async () => {
-    username.value = ''
-    password.value = ''
-    await load()
-  })
+  await runAction(
+    () => props.api.create(username.value, password.value),
+    async () => {
+      username.value = ''
+      password.value = ''
+      await load()
+    },
+  )
 }
 
 async function handleDelete(id) {
-  if (!confirm(id)) return
   await runAction(() => props.api.remove(id), load)
 }
 
-// TeachersView reloads the list after a seed
+// AdminView reloads the list after a seed
 defineExpose({load})
 </script>
 
@@ -119,16 +120,13 @@ defineExpose({load})
     >
       <div class="user-info">
         <strong class="wrap-name">{{ user.username }}</strong>
-        <span class="user-count">{{ t(`${i18nPrefix}.grade_count`, {n: user.grade_count}) }}</span>
+        <span class="user-count">{{ t(`${i18nPrefix}.grade_count`, user.grade_count) }}</span>
       </div>
-      <button
-        :class="pendingId === user.id ? 'btn-danger-confirm' : 'btn-danger'"
-        type="button"
+      <ConfirmButton
+        :confirm-id="user.id"
         :disabled="loading"
-        @click="handleDelete(user.id)"
-      >
-        {{ pendingId === user.id ? t('common.confirmation') : t('common.delete') }}
-      </button>
+        @confirm="handleDelete(user.id)"
+      />
     </div>
   </div>
 </template>

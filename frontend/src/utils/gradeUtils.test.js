@@ -23,9 +23,15 @@ describe('parseGrade', () => {
     ])('accepts %j with %j as %j', (text, separator, value) => {
         expect(parseGrade(text, separator)).toEqual({valid: true, value})
     })
-    it.each([
-        '10,1', '11', '-1', '-0', '8,55', '7,a', 'abc', ' ', ' 7 ', '+5', '05', '1e1', '0x5', '7,', ',5', '7,5,3', '8.5',
-    ])('rejects %j with comma separator', (text) => {
+
+    // short inputs packed per line, prettier would put each on its own line
+    // prettier-ignore
+    const invalidTexts = [
+        '10,1', '11', '-1', '-0', '8,55', '7,a', 'abc', ' ', ' 7 ',
+        '+5', '05', '1e1', '0x5', '7,', ',5', '7,5,3', '8.5',
+    ]
+
+    it.each(invalidTexts)('rejects %j with comma separator', (text) => {
         expect(parseGrade(text, ',')).toEqual({valid: false, value: null})
     })
 })

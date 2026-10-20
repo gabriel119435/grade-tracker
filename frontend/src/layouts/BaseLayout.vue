@@ -4,7 +4,7 @@ import AppTopBar from '../components/AppTopBar.vue'
 </script>
 
 <template>
-  <AppTopBar/>
-  <RouterView/>
-  <AppToast/>
+  <AppTopBar />
+  <RouterView />
+  <AppToast />
 </template>

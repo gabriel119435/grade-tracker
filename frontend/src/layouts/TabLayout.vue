@@ -14,6 +14,6 @@ const {t} = useI18n()
       <RouterLink to="/teacher/grades">{{ t('nav.grades') }}</RouterLink>
     </div>
   </AppTopBar>
-  <RouterView/>
-  <AppToast/>
+  <RouterView />
+  <AppToast />
 </template>

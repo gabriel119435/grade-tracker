@@ -7,6 +7,9 @@ each new file builds on what came before, read them in order for the most cohere
     - `package.json`: project name, dependencies, and dev scripts
     - `.nvmrc`: exact node version, read by `nvm use`, matches the docker build
     - `vite.config.js`: build tool and dev server config with flask's proxy
+    - `eslint.config.js`: linter rules per file type, `npm run lint` reports bugs in js, vue and css
+    - `prettier.config.js`: formatter layout options, `npm run format:check` lists files off that layout
+    - `.prettierignore`: files prettier skips, the build output and npm's lock file
     - `index.html`: the html shell the browser loads, the single `<div id="app">` the vue instance mounts into
     - `public/favicon.svg`: the browser tab icon
 - **base**: the foundational files that wire the whole app together
@@ -31,7 +34,8 @@ each new file builds on what came before, read them in order for the most cohere
         - `composables/generic/useToast.js`: app-wide notification: one shared message auto-dismissed after 4 seconds
         - `composables/generic/useConfirm.js`: two-click confirmation state for important actions
         - `composables/generic/useLatestCall.js`: drops answers of calls that a newer call replaced
-        - `composables/generic/useListLoad.js`: list fetch of the list views, error toast and stale drop
+        - `composables/generic/useLoad.js`: latest-wins fetch with error toast, failed and ready flags, base of the loaders
+        - `composables/generic/useListLoad.js`: list fetch of the list views, `useLoad` with an empty list
         - `composables/generic/useAction.js`: button action runner: loading guard, error toast, success callback
     - **directives**
         - `directives/clickOutside.js`: calls handler when clicked outside registered element
@@ -77,10 +81,11 @@ each new file builds on what came before, read them in order for the most cohere
         - `components/DateInput.vue`: date input with locale-aware display and real-time validation
         - `components/GradeLimitControls.vue`: the grade history limit button group, highlights the active limit
         - `components/LoadError.vue`: failed load message and retry button, inside the card the data would fill
+        - `components/ConfirmButton.vue`: two-click danger button for delete and seed, emits `confirm` on the second click
         - `components/UserList.vue`: create form, live checks, list and delete of teachers or students
         - `components/GradeForm.vue`: the full grade input form, used only in the teacher grades view
     - **composables**
-        - `composables/grades/useChartGrades.js`: chart data of both grade views, fetch, error toast, stale drop
+        - `composables/grades/useChartGrades.js`: chart data of both grade views, `useLoad` over `getGrades`
         - `composables/grades/useGrades.js`: grade form state: day grades, cells, cell states, save, locale rewrite
     - **charts**
         - `components/GradeChart.vue`: a single chart.js line chart for one subcategory
@@ -92,7 +97,7 @@ each new file builds on what came before, read them in order for the most cohere
         - **login**
             - `views/LoginView.vue`: login form, the simplest full page in the app
         - **admin**
-            - `views/admin/TeachersView.vue`: create and delete teachers, change the admin password, and seed db
+            - `views/admin/AdminView.vue`: create and delete teachers, change the admin password, and seed db
         - **student**
             - `views/student/GradesView.vue`: student's read-only grade history as charts
         - **teacher**

@@ -23,17 +23,14 @@ vi.mock('vue-router', () => ({
 vi.mock('../views/LoginView.vue', () => ({default: {}}))
 vi.mock('../layouts/BaseLayout.vue', () => ({default: {}}))
 vi.mock('../layouts/TabLayout.vue', () => ({default: {}}))
-vi.mock('../views/admin/TeachersView.vue', () => ({default: {}}))
+vi.mock('../views/admin/AdminView.vue', () => ({default: {}}))
 vi.mock('../views/teacher/CategoriesView.vue', () => ({default: {}}))
 vi.mock('../views/teacher/StudentsView.vue', () => ({default: {}}))
 vi.mock('../views/teacher/GradesView.vue', () => ({default: {}}))
 vi.mock('../views/student/GradesView.vue', () => ({default: {}}))
 
 // minimal route object with the fields the guard reads, route(path) alone uses the defaults
-function route(
-    path,
-    {matched = [{}], meta = {}} = {}
-) {
+function route(path, {matched = [{}], meta = {}} = {}) {
     return {path, matched, meta}
 }
 
@@ -90,10 +87,10 @@ describe('access', () => {
         ['teacher', '/login', {}, '/teacher'],
         ['teacher', '/nonexistent', {matched: []}, '/teacher'],
         // own role allowed, another role's page goes home
-        ['admin', '/admin/teachers', {meta: {allowed_role: 'admin'}}, true],
+        ['admin', '/admin', {meta: {allowed_role: 'admin'}}, true],
         ['admin', '/teacher/categories', {meta: {allowed_role: 'teacher'}}, '/admin'],
         ['teacher', '/teacher/categories', {meta: {allowed_role: 'teacher'}}, true],
-        ['teacher', '/admin/teachers', {meta: {allowed_role: 'admin'}}, '/teacher'],
+        ['teacher', '/admin', {meta: {allowed_role: 'admin'}}, '/teacher'],
         ['student', '/student', {meta: {allowed_role: 'student'}}, true],
         ['student', '/teacher/grades', {meta: {allowed_role: 'teacher'}}, '/student'],
         // matched route with no role rule: open to any logged-in user

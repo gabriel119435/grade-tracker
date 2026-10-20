@@ -4,14 +4,14 @@ import re
 
 from flask import Flask, jsonify
 from flask_login import LoginManager
-from sqlalchemy import select, text
+from sqlalchemy import select
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash
 
-from app.constants import DEFAULT_LOCALE
-from app.db import get_session, engine, Base
-from app.models import User, AuthUser
-from app.routes.auth import auth_bp
+from app.db import get_session
+from app.migrations import apply_migrations
+from app.models import AuthUser, User
+from app.routes.auth import DEFAULT_ADMIN_PASS, auth_bp
 from app.routes.categories import categories_bp
 from app.routes.grades import grades_bp
 from app.routes.seed import seed_bp
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def create_app():
     # same as flask default format: [2026-09-28 16:26:08,926] INFO in __init__: admin created
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
-    _apply_migrations()
+    apply_migrations()
     _create_admin()  # needs the final schema, so it runs after every migration
 
     app = Flask(__name__)
@@ -60,6 +60,8 @@ def create_app():
 
     @app.errorhandler(HTTPException)
     def handle_http_error(e):
+        # a snake_case description is an error code, sent as is: a typo reaches the ui as "<code> not found", by design
+        # any other text, like werkzeug's default sentences, falls back to the status name below
         if re.fullmatch(r"[a-z_]+", e.description):
             return jsonify({"error": e.description}), e.code
         # "Method Not Allowed" -> "method_not_allowed"
@@ -68,25 +70,6 @@ def create_app():
     _register_blueprints(app)
 
     return app
-
-
-# migrations are by default idempotent, are always applied on startup
-def _apply_migrations():
-    _migration_000_create_db()
-    _migration_001_add_locale()
-
-
-def _migration_000_create_db():
-    Base.metadata.create_all(engine)  # idempotent: no op if tables already exist
-
-
-def _migration_001_add_locale():
-    with engine.connect() as conn:
-        # runs after 000, so the users table always exists here
-        columns =[row[1] for row in conn.execute(text("PRAGMA table_info(users)"))]
-        if "locale" not in columns:
-            conn.execute(text(f"ALTER TABLE users ADD COLUMN locale TEXT NOT NULL DEFAULT '{DEFAULT_LOCALE}'"))
-            conn.commit()
 
 
 # data step, not a migration: runs on every startup, creates the admin only if missing
@@ -106,8 +89,8 @@ def _create_admin():
 
 
 def _get_admin_pass():
-    # ADMIN_PASS unset or empty: use a known weak default, for local dev only
-    admin_pass = os.environ.get("ADMIN_PASS") or "admin pass"
+    # ADMIN_PASS unset or empty: DEFAULT_ADMIN_PASS from routes/auth.py
+    admin_pass = os.environ.get("ADMIN_PASS") or DEFAULT_ADMIN_PASS
     # same rules as every other password, for both the env value and the default
     error = password_error(admin_pass)
     if error:

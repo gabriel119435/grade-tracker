@@ -36,9 +36,7 @@ const collapsedCategories = ref(new Set())
 const categoryAverages = computed(() => {
   const result = {}
   for (const cat of props.grades) {
-    const latestValues = cat.subcategories
-      .map(sub => sub.grades.at(-1)?.value)
-      .filter(v => v !== undefined)
+    const latestValues = cat.subcategories.map((sub) => sub.grades.at(-1)?.value).filter((v) => v !== undefined)
     if (!latestValues.length) {
       result[cat.category] = null
       continue
@@ -60,7 +58,7 @@ function toggleCategory(name) {
   <div class="history-card">
     <div class="grades-header">
       <span class="grades-title">{{ t('charts.title') }}</span>
-      <GradeLimitControls v-model="limit"/>
+      <GradeLimitControls v-model="limit" />
     </div>
 
     <LoadError
@@ -113,7 +111,7 @@ function toggleCategory(name) {
                 {{ t('charts.latest') }}: {{ localizeGrade(subcat.grades.at(-1).value, separator) }}
               </span>
             </div>
-            <GradeChart :grades="subcat.grades"/>
+            <GradeChart :grades="subcat.grades" />
           </div>
         </div>
       </div>

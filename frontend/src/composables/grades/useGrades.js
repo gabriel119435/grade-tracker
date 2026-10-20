@@ -1,8 +1,6 @@
 import {computed, ref, watch} from 'vue'
 import {getDayGrades, saveGrades} from '../../api/routes/grades.js'
-import {useToast} from '../generic/useToast.js'
-import {useLatestCall} from '../generic/useLatestCall.js'
-import {translateError} from '../../utils/translateError.js'
+import {useLoad} from '../generic/useLoad.js'
 import {classifyGradeEdits, localizeGrade, parseGrade} from '../../utils/gradeUtils.js'
 import {localToday} from '../../utils/dateUtils.js'
 
@@ -10,8 +8,6 @@ import {localToday} from '../../utils/dateUtils.js'
 // ref([{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}])
 // getSeparator: returns the current locale decimal separator: ',' or '.'
 export function useGrades(categories, getSeparator) {
-    const {toast} = useToast()
-
     // student whose grades are loaded
     const studentId = ref(null)
 
@@ -21,24 +17,18 @@ export function useGrades(categories, getSeparator) {
     // subcategoryId -> cell text exactly as shown: {3: '7,5', 4: '', 7: 'abc'}
     const cellTexts = ref({})
 
-    // every grade of studentId on inputGradeDate, unlimited: {3: {id: 10, value: 7.5}} keyed by subcategoryId
+    // savedDayGrades: every grade of studentId on inputGradeDate, unlimited: {3: {id: 10, value: 7.5}}
     // source for prefill, cell states and save
-    const savedDayGrades = ref({})
-
-    // drops day loads replaced by a newer student or date pick, see useLatestCall.js
-    const {start: startDayLoad} = useLatestCall()
-
-    // true when the newest day load failed, the form shows an inline message instead of the cells
-    const savedDayGradesFailed = ref(false)
-
-    // true only after the newest day load succeeded, false before a load, while one is in flight and after a failure
-    // every student or date change starts a load, so true always means the current pair, save waits for it
-    const savedDayGradesReady = ref(false)
+    // savedDayGradesReady: every student or date change starts a load, so true always means the current pair
+    const {
+        data: savedDayGrades,
+        ready: savedDayGradesReady,
+        failed: savedDayGradesFailed,
+        load,
+    } = useLoad(getDayGrades, {})
 
     // every cell classified against the saved grades: error | new | updating | deleting | unchanged
-    const classifiedCells = computed(() =>
-        classifyGradeEdits(savedDayGrades.value, cellTexts.value, getSeparator())
-    )
+    const classifiedCells = computed(() => classifyGradeEdits(savedDayGrades.value, cellTexts.value, getSeparator()))
 
     // {3: null, 4: 'grade-cell-new', 7: 'grade-cell-error'}
     const cellStates = computed(() => {
@@ -50,11 +40,11 @@ export function useGrades(categories, getSeparator) {
     })
 
     // true if any cell holds invalid text, blocks save
-    const hasGradeErrors = computed(() => classifiedCells.value.some(edit => edit.state === 'error'))
+    const hasGradeErrors = computed(() => classifiedCells.value.some((edit) => edit.state === 'error'))
 
     // true if any valid cell differs from its saved grade, save needs at least one
     const hasChanges = computed(() =>
-        classifiedCells.value.some(edit => ['new', 'updating', 'deleting'].includes(edit.state))
+        classifiedCells.value.some((edit) => ['new', 'updating', 'deleting'].includes(edit.state)),
     )
 
     function prefill() {
@@ -69,21 +59,10 @@ export function useGrades(categories, getSeparator) {
     }
 
     async function loadDayGrades() {
-        const isLatest = startDayLoad()
-        savedDayGradesFailed.value = false
-        savedDayGradesReady.value = false
-        const data = await getDayGrades(studentId.value, inputGradeDate.value)
-        if (!isLatest()) return
-        if (data.error) {
-            cellTexts.value = {}
-            savedDayGrades.value = {}
-            savedDayGradesFailed.value = true
-            toast(translateError(data.error), 'error')
-            return
-        }
-        savedDayGrades.value = data
-        savedDayGradesReady.value = true
-        prefill()
+        const stored = await load(studentId.value, inputGradeDate.value)
+        // stored: prefill the cells, failed: empty them, replaced by a newer load: that load owns the cells
+        if (stored) prefill()
+        else if (savedDayGradesFailed.value) cellTexts.value = {}
     }
 
     // grade cells of one student, the selected date is kept
@@ -100,7 +79,7 @@ export function useGrades(categories, getSeparator) {
             if (state === 'new' || state === 'updating') {
                 toUpsert.push({
                     subcategory_id: Number(subcategoryId),
-                    value
+                    value,
                 })
             } else if (state === 'deleting') {
                 toDelete.push(original.id)

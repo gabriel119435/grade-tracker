@@ -17,7 +17,7 @@ const model = defineModel({type: [String, Number]})
 // whether the option list is visible
 const open = ref(false)
 // undefined while nothing valid is selected, shows the gray placeholder
-const selectedOption = computed(() => props.options.find(o => optValue(o) === model.value))
+const selectedOption = computed(() => props.options.find((o) => optValue(o) === model.value))
 
 function optValue(o) {
   return typeof o === 'string' ? o : o.value
@@ -41,7 +41,7 @@ function onFocusOut(e) {
 
 <template>
   <div
-    v-click-outside="() => open = false"
+    v-click-outside="() => (open = false)"
     class="app-dropdown"
     @keydown.esc="open = false"
     @focusout="onFocusOut"

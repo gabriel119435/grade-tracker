@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from flask_login import UserMixin
-from sqlalchemy import Enum, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, Index, UniqueConstraint, delete
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.constants import DEFAULT_LOCALE, LOCALES
@@ -10,8 +10,8 @@ from app.db import Base
 
 @dataclass
 class AuthUser(UserMixin):
-    # flask-login needs a user object for login_user() and current_user. a User row can't be that object.
-    # its db session closes right away, which crashes on relationships. this copy holds only plain fields.
+    # flask-login needs a user object for login_user() and current_user, this plain copy is that object.
+    # it adds get_id() below, which User lacks, and keeps orm rows out of current_user.
     id: int
     username: str
     role: str
@@ -25,11 +25,7 @@ class AuthUser(UserMixin):
     @classmethod
     def from_user(cls, user):
         return cls(
-            id=user.id,
-            username=user.username,
-            role=user.role,
-            password_hash=user.password_hash,
-            locale=user.locale
+            id=user.id, username=user.username, role=user.role, password_hash=user.password_hash, locale=user.locale
         )
 
 
@@ -42,7 +38,9 @@ class User(Base):
     role: Mapped[str] = mapped_column(Enum("admin", "teacher", "student"))
     locale: Mapped[str] = mapped_column(
         # default sqlalchemy level, server_default db level
-        Enum(*LOCALES), default=DEFAULT_LOCALE, server_default=DEFAULT_LOCALE
+        Enum(*LOCALES),
+        default=DEFAULT_LOCALE,
+        server_default=DEFAULT_LOCALE,
     )
 
 
@@ -54,11 +52,8 @@ class Category(Base):
 
     # passive_deletes: one DELETE on the parent, sqlite cascades the children, o(1) in python.
     # without it sqlalchemy loads every child first, o(n).
-    subcategories: Mapped[list["Subcategory"]] = relationship(
-        back_populates="category",
-        cascade="all, delete-orphan",
-        order_by="Subcategory.id",
-        passive_deletes=True
+    subcategories: Mapped[list[Subcategory]] = relationship(
+        back_populates="category", cascade="all, delete-orphan", order_by="Subcategory.id", passive_deletes=True
     )
 
 
@@ -73,7 +68,7 @@ class Subcategory(Base):
     __table_args__ = (UniqueConstraint("category_id", "name"),)
 
     # python-only access to the category row through `category_id`, no db column
-    category: Mapped["Category"] = relationship(back_populates="subcategories")
+    category: Mapped[Category] = relationship(back_populates="subcategories")
 
 
 class Grade(Base):
@@ -98,4 +93,12 @@ class Grade(Base):
     )
 
     # python-only access to the subcategory row through `subcategory_id`, no db column
-    subcategory: Mapped["Subcategory"] = relationship()
+    subcategory: Mapped[Subcategory] = relationship()
+
+
+def wipe(session):
+    # deletes all grades, subcategories, categories and non admin users, children first.
+    session.execute(delete(Grade))
+    session.execute(delete(Subcategory))
+    session.execute(delete(Category))
+    session.execute(delete(User).where(User.username != "admin"))

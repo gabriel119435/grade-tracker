@@ -1,24 +1,25 @@
-import router from '../router/index.js'
-import {store} from '../store.js'
+// 401 and 403 reaction, registered by main.js, keeps request.js free of router imports
+let onSessionLost = () => {}
+
+export function setSessionLostHandler(handler) {
+    onSessionLost = handler
+}
 
 export async function request(url, options = {}) {
     let res
 
     try {
-        const headers = options.body
-            ? {'Content-Type': 'application/json', ...options.headers}
-            : options.headers
+        const headers = options.body ? {'Content-Type': 'application/json', ...options.headers} : options.headers
         res = await fetch(url, {...options, headers})
     } catch (err) {
         console.error('network error:', err)
         return {error: 'network_error'}
     }
 
-    if (res.status === 401 && url !== '/api/login') {
-        // session gone: forget the user so the guard allows /login
-        store.user = null
-        await router.push('/login')
-        return {error: 'unauthorized'}
+    // 401: session gone, 403: cookie belongs to another user than store.user, a tab left open across a login
+    if ((res.status === 401 || res.status === 403) && url !== '/api/login') {
+        await onSessionLost()
+        return {error: res.status === 401 ? 'unauthorized' : 'forbidden'}
     }
 
     if (!res.ok) {
@@ -26,7 +27,9 @@ export async function request(url, options = {}) {
         try {
             const body = JSON.parse(text)
             if (body.error) return {error: body.error}
-        } catch {}
+        } catch {
+            // non-json body: falls through to invalid_response below
+        }
         console.error('server error:', text)
         return {error: 'invalid_response'}
     }

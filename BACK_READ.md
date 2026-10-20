@@ -11,7 +11,8 @@ each new file builds on what came before, read them in order for the most cohere
     - `constants.py`: input length rules, supported locales and the default one mirrored by `frontend/src/constants.js`
     - `validation.py`: password length, name length and word size checks built on those rules
     - `db.py`: sqlite engine and `get_session()`, the single way to open a database session anywhere in the codebase
-    - `models.py`: all database tables as python classes: `User`, `Category`, `Subcategory`, `Grade`, and `AuthUser`
+    - `models.py`: tables `User`, `Category`, `Subcategory`, `Grade`, plus `AuthUser` and `wipe()` keeping only admin
+    - `migrations.py`: schema changes run on every startup, each one idempotent
     - `__init__.py`: `create_app()`, wires the database, auth, error handling, and all blueprints into a flask app
 - **route helpers**: shared utilities used by blueprints
     - `routes/helpers/decorators.py`: decorators for route access control

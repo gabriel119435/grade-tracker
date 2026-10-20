@@ -26,15 +26,17 @@ const borderColor = getComputedStyle(document.documentElement).getPropertyValue(
 
 const chartData = computed(() => ({
   // dates in the locale format used as plain category labels: '31/01/2024'
-  labels: props.grades.map(g => localizeDate(g.date, t('date_input.format'))),
-  datasets: [{
-    data: props.grades.map(g => g.value),
-    borderColor,
-    borderWidth: 2,
-    pointRadius: 1,
-    // point circles render past the y-axis min/max (values 0 or 10)
-    clip: false,
-  }],
+  labels: props.grades.map((g) => localizeDate(g.date, t('date_input.format'))),
+  datasets: [
+    {
+      data: props.grades.map((g) => g.value),
+      borderColor,
+      borderWidth: 2,
+      pointRadius: 1,
+      // point circles render past the y-axis min/max (values 0 or 10)
+      clip: false,
+    },
+  ],
 }))
 
 // computed: vue-chartjs only reapplies options when it gets a new object, a locale switch builds one

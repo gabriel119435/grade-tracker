@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, abort
-from flask_login import login_user, logout_user, current_user
+from flask import Blueprint, abort, jsonify
+from flask_login import current_user, login_user, logout_user
 from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -12,9 +12,14 @@ from app.validation import password_error
 
 auth_bp = Blueprint("auth", __name__)
 
+# admin password when ADMIN_PASS is unset or empty, a known weak default for local dev only
+DEFAULT_ADMIN_PASS = "admin pass"
+# a missing user still runs one scrypt check, so response time doesn't reveal which usernames exist
+_DUMMY_HASH = generate_password_hash(DEFAULT_ADMIN_PASS)
+
 
 # public user fields sent to the frontend, never the password hash
-def _user_json(user):
+def _build_user_json(user):
     return {"id": user.id, "username": user.username, "role": user.role, "locale": user.locale}
 
 
@@ -27,13 +32,14 @@ def login():
     with get_session() as session:
         user = session.scalar(select(User).filter_by(username=username))
 
-        if not user or not check_password_hash(user.password_hash, password):
+        password_hash = user.password_hash if user else _DUMMY_HASH
+        if not check_password_hash(password_hash, password) or not user:
             abort(401, "invalid_credentials")
 
         auth_user = AuthUser.from_user(user)
 
     login_user(auth_user)
-    return jsonify({"user": _user_json(auth_user)})
+    return jsonify({"user": _build_user_json(auth_user)})
 
 
 # @route stays on top: decorators apply bottom-up. if swapped, flask would register the unprotected function
@@ -84,6 +90,4 @@ def set_locale():
 
 @auth_bp.route("/api/me")
 def me():
-    return jsonify(
-        {"user": _user_json(current_user) if current_user.is_authenticated else None}
-    )
+    return jsonify({"user": _build_user_json(current_user) if current_user.is_authenticated else None})

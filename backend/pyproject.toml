@@ -10,9 +10,20 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.17.1",
+]
 
 [tool.pytest.ini_options]
 # pytest looks in tests/ for files named test_*.py or *_test.py and runs their test_* functions
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff]
+# every file in the repo keeps lines under 120 chars
+line-length = 120
+
+[tool.ruff.lint]
+# defaults plus long lines, formatting can't shorten comments or strings
+extend-select = ["E501"]

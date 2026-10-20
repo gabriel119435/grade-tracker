@@ -1,10 +1,7 @@
 // converts ISO (YYYY-MM-DD) to locale display format, for display
 export function localizeDate(normalizedDate, localDateFormat) {
     const [year, month, day] = normalizedDate.split('-')
-    return localDateFormat
-        .replace('YYYY', year)
-        .replace('MM', month)
-        .replace('DD', day)
+    return localDateFormat.replace('YYYY', year).replace('MM', month).replace('DD', day)
 }
 
 // converts a complete locale display date to ISO (YYYY-MM-DD), caller must pass a complete string

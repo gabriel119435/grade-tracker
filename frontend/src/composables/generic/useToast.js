@@ -1,4 +1,5 @@
 import {ref} from 'vue'
+import {store} from '../../store.js'
 
 const TOAST_DURATION_MS = 4000
 
@@ -8,17 +9,16 @@ let timer = null
 
 export function useToast() {
     function toast(msg, newType = 'success') {
+        // logged out: the login page has no AppToast, the message would pop up after the next login
+        if (!store.user) return
         clearTimeout(timer)
 
         message.value = msg
         type.value = newType
 
-        timer = setTimeout(
-            () => {
-                message.value = null
-            },
-            TOAST_DURATION_MS
-        )
+        timer = setTimeout(() => {
+            message.value = null
+        }, TOAST_DURATION_MS)
     }
 
     // single message and type for the whole app, rendered by AppToast.vue
@@ -27,6 +27,6 @@ export function useToast() {
     return {
         message,
         type,
-        toast
+        toast,
     }
 }

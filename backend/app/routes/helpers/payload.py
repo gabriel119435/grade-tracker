@@ -32,12 +32,16 @@ def get_str(data, key, default=None):
     return value
 
 
+def is_number(value, kinds=int):
+    # bool is a subclass of int in python: json true/false must not pass as 1/0
+    return isinstance(value, kinds) and not isinstance(value, bool)
+
+
 def get_int(data, key):
     value = data.get(key)
     # missing key and json null both return None
     if value is None:
         return None
-    # bool is a subclass of int in python: json true/false must not pass as 1/0
-    if not isinstance(value, int) or isinstance(value, bool):
+    if not is_number(value):
         abort(400, "invalid_payload")
     return value

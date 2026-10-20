@@ -5,7 +5,9 @@
     /* browser default margins and paddings, ex: <h2> margins, <ul> left padding */
     margin: 0;
     padding: 0;
-    /* no text selection on purpose, app-like ui, webkit for safari */
+    /* no text selection on purpose, app-like ui */
+    /* not baseline: safari reads -webkit-user-select below, every other browser reads this one */
+    /* eslint-disable-next-line css/use-baseline */
     user-select: none;
     -webkit-user-select: none;
 }

@@ -35,43 +35,45 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="login-page login-card">
-    <h1>{{ t('login.title') }}</h1>
-    <p
-      v-if="store.sessionCheckFailed"
-      class="field-error"
-    >
-      {{ t('login.session_check_failed') }}
-    </p>
-    <form @submit.prevent="handleSubmit">
-      <input
-        v-model="username"
-        type="text"
-        required
-        :placeholder="t('login.username')"
-        :maxlength="USERNAME_MAX_LENGTH"
-      />
-      <input
-        ref="passwordInput"
-        v-model="password"
-        type="password"
-        required
-        :placeholder="t('login.password')"
-        :maxlength="PASSWORD_MAX_LENGTH"
-      />
-      <button
-        class="btn-primary"
-        type="submit"
-        :disabled="loading"
-      >
-        {{ t('login.submit') }}
-      </button>
+  <div class="login-page">
+    <div class="login-card">
+      <h1>{{ t('login.title') }}</h1>
       <p
-        v-if="error"
+        v-if="store.sessionCheckFailed"
         class="field-error"
       >
-        {{ error }}
+        {{ t('login.session_check_failed') }}
       </p>
-    </form>
+      <form @submit.prevent="handleSubmit">
+        <input
+          v-model="username"
+          type="text"
+          required
+          :placeholder="t('login.username')"
+          :maxlength="USERNAME_MAX_LENGTH"
+        />
+        <input
+          ref="passwordInput"
+          v-model="password"
+          type="password"
+          required
+          :placeholder="t('login.password')"
+          :maxlength="PASSWORD_MAX_LENGTH"
+        />
+        <button
+          class="btn-primary"
+          type="submit"
+          :disabled="loading"
+        >
+          {{ t('login.submit') }}
+        </button>
+        <p
+          v-if="error"
+          class="field-error"
+        >
+          {{ error }}
+        </p>
+      </form>
+    </div>
   </div>
 </template>

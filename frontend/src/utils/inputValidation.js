@@ -12,5 +12,5 @@ export function isPasswordTooShort(value) {
 
 // true when any space-separated word is longer than NAME_WORD_MAX_LENGTH
 export function isNameWordTooLong(value) {
-    return value.split(/\s+/).some(word => word.length > NAME_WORD_MAX_LENGTH)
+    return value.split(/\s+/).some((word) => word.length > NAME_WORD_MAX_LENGTH)
 }

@@ -35,7 +35,10 @@ describe('validateLocalizedDate', () => {
     ])('accepts %j with %s as %j', (text, format, expected) => {
         expect(validateLocalizedDate(text, format)).toBe(expected)
     })
-    it.each([
+
+    // inputs grouped by reason, prettier would put each on its own line
+    // prettier-ignore
+    const invalidDates = [
         // wrong length
         '15/1/2024', '15/01/24',
         // wrong separator
@@ -50,7 +53,9 @@ describe('validateLocalizedDate', () => {
         '00/01/2024', '30/02/2024',
         // february 29 outside a leap year
         '29/02/2023',
-    ])('rejects %j with DD/MM/YYYY', (text) => {
+    ]
+
+    it.each(invalidDates)('rejects %j with DD/MM/YYYY', (text) => {
         expect(validateLocalizedDate(text, 'DD/MM/YYYY')).toBeNull()
     })
 })

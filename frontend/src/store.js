@@ -1,7 +1,19 @@
 import {reactive} from 'vue'
+import {i18n} from './i18n.js'
+import {DEFAULT_LOCALE} from './constants.js'
 
 export const store = reactive({
-    user: null,                // {id: 1, username: 'admin', role: 'admin', locale: 'en'} or null if logged out
-    sessionLoaded: false,      // true once getMe() answered, false again after logout
-    sessionCheckFailed: false, // true when getMe() fails
+    // {id: 1, username: 'admin', role: 'admin', locale: 'en'} or null if logged out
+    user: null,
+    // true once getMe() answered, false again after clearSession()
+    sessionLoaded: false,
+    // true when getMe() fails
+    sessionCheckFailed: false,
 })
+
+// logged-out state: user, session check and locale back to defaults, used by logout and by any 401
+export function clearSession() {
+    store.user = null
+    store.sessionLoaded = false
+    i18n.global.locale.value = DEFAULT_LOCALE
+}

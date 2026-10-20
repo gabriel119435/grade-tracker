@@ -1,15 +1,16 @@
 from datetime import date as date_type
+from itertools import groupby
 
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, abort, jsonify, request
 from flask_login import current_user
-from sqlalchemy import func, select, delete
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import contains_eager
 
 from app.db import get_session
-from app.models import Grade, User, Subcategory
+from app.models import Grade, Subcategory, User
 from app.routes.helpers.decorators import require_role
-from app.routes.helpers.payload import get_body, get_int, get_list, get_str
+from app.routes.helpers.payload import get_body, get_int, get_list, get_str, is_number
 
 MAX_GRADE_LIMIT = 100
 
@@ -63,7 +64,7 @@ def _check_student(session, student_id):
         abort(404, "not_found")
 
 
-def _upsert_grades(session, student_id: int, grade_date, upsert_grades):
+def _upsert_grades(session, student_id, grade_date, upsert_grades):
     if not all(isinstance(grade, dict) for grade in upsert_grades):
         abort(400, "invalid_payload")
     subcategory_ids = [get_int(grade, "subcategory_id") for grade in upsert_grades]
@@ -73,8 +74,7 @@ def _upsert_grades(session, student_id: int, grade_date, upsert_grades):
     validated = []
     for grade in upsert_grades:
         value = grade.get("value")
-        # bool is a subclass of int in python: json true/false must not become 1.0/0.0
-        if not isinstance(value, (int, float)) or isinstance(value, bool):
+        if not is_number(value, (int, float)):
             abort(400, "invalid_grade_value")
         value = round(value, 1)
         if not (0 <= value <= 10):
@@ -83,11 +83,11 @@ def _upsert_grades(session, student_id: int, grade_date, upsert_grades):
             abort(400, "invalid_subcategory_id")
         validated.append((grade.get("subcategory_id"), value))
 
-    # one cell per subcategory: two entries for the same one is not accepted
+    # one cell per subcategory: two entries for the same one are rejected
     if len({subcategory_id for subcategory_id, _ in validated}) != len(validated):
         abort(400, "duplicate_subcategory_id")
 
-    # single insert ... on conflict do update.
+    # single insert ... on conflict do update
     # conflict target mirrors unique constraint on 'student_id', 'subcategory_id' and 'date'
     upsert = sqlite_insert(Grade).values(
         [
@@ -113,8 +113,8 @@ def _upsert_grades(session, student_id: int, grade_date, upsert_grades):
     )
 
 
-def _delete_grades(session, student_id: int, delete_grade_ids):
-    if not all(type(grade_id) is int for grade_id in delete_grade_ids):
+def _delete_grades(session, student_id, delete_grade_ids):
+    if not all(is_number(grade_id) for grade_id in delete_grade_ids):
         abort(400, "invalid_payload")
     delete_grade_ids_set = set(delete_grade_ids)
     # grades with matching id, grades not belonging to this student
@@ -145,13 +145,12 @@ def get_student_day_grades(student_id, grade_date):
         _check_student(session, student_id)
 
         rows = session.execute(
-            select(Grade.id, Grade.subcategory_id, Grade.value)
-            .where(Grade.student_id == student_id, Grade.date == grade_date)
+            select(Grade.id, Grade.subcategory_id, Grade.value).where(
+                Grade.student_id == student_id, Grade.date == grade_date
+            )
         ).all()
 
-    return jsonify(
-        {subcategory_id: {"id": grade_id, "value": value} for grade_id, subcategory_id, value in rows}
-    )
+    return jsonify({subcategory_id: {"id": grade_id, "value": value} for grade_id, subcategory_id, value in rows})
 
 
 @grades_bp.route("/api/students/<int:student_id>/grades")
@@ -160,7 +159,7 @@ def get_student_grades(student_id):
     # teachers share a single student pool: any teacher may view any student's grades
     # students are restricted to their own data only
     if current_user.role == "student" and current_user.id != student_id:
-        abort(403, "forbidden")  # student trying to access another student's grades
+        abort(403, "forbidden")
 
     # limit=5: 5
     # no limit, limit=abc, limit=0, limit=-1 or limit=500: 100
@@ -177,66 +176,62 @@ def get_student_grades(student_id):
         row_num = (
             func.row_number()
             .over(
-                partition_by=Grade.subcategory_id,  # restart count for each subcategory
-                order_by=Grade.date.desc(),  # 1 = most recent grade in that subcategory
+                partition_by=Grade.subcategory_id,
+                order_by=Grade.date.desc(),
             )
             .label("row_num")
         )
 
         # subquery: every grade id for this student, each grade tagged with its row_num
         # student with 1500 grades -> 1500 rows like (id 5400, row_num 1), (id 3240, row_num 2), ...
-        ranked_grades = (
-            select(Grade.id, row_num)
-            .where(Grade.student_id == student_id)
-            .subquery()
-        )
+        ranked_grades = select(Grade.id, row_num).where(Grade.student_id == student_id).subquery("ranked_grades")
 
-        # top n rows per subcategory (row_num 1...limit), with subcategory and category joined, oldest to newest
+        # top n rows per subcategory (row_num 1...limit), with subcategory and category joined
         # ex: limit 5 and 45 graded subcategories = 225 flat grades, however many categories hold them
         grades = session.scalars(
             select(Grade)
             .join(ranked_grades, Grade.id == ranked_grades.c.id)
+            .join(Grade.subcategory)
+            .join(Subcategory.category)
             .where(ranked_grades.c.row_num <= limit)
-            .options(joinedload(Grade.subcategory).joinedload(Subcategory.category))
-            .order_by(Grade.date)
+            # options only fill python attributes in this same query, they never filter or sort rows
+            # contains_eager fills grade.subcategory and subcategory.category from the 2 joins above, no extra query
+            .options(contains_eager(Grade.subcategory).contains_eager(Subcategory.category))
+            # subcategories.category_id, then subcategory, then oldest to newest
+            .order_by(Subcategory.category_id, Grade.subcategory_id, Grade.date)
         ).all()
 
+    # grades: flat list of Grade objects, no nesting, sorted by category id, subcategory id, then date
+    # _build_grades_response reads grade id, value, date, subcat id, subcat name and cat name, all loaded above
     return jsonify(_build_grades_response(grades))
 
 
-# groups a flat list of grade objects into the nested structure the frontend expects.
-# sorted by cat_id then sub_id (cat ids are used only for ordering, not included in output).
-# grades keep the query order, oldest to newest:
+# nests the sorted flat grades into the structure the frontend expects:
 # [
-#     {'category': 'forehand', 'subcategories': [{'id': 10, 'name': 'spin',     'grades': [{'id': 5, 'value': 8.5, 'date': '2024-01-15'}]}]},
-#     {'category': 'serve',    'subcategories': [{'id': 20, 'name': 'position', 'grades': [{'id': 6, 'value': 7.0, 'date': '2024-01-15'}]}]}
+#     {'category': 'forehand', 'subcategories': [
+#         {'id': 10, 'name': 'spin', 'grades': [{'id': 5, 'value': 8.5, 'date': '2024-01-15'}]},
+#     ]},
+#     {'category': 'serve', 'subcategories': [
+#         {'id': 20, 'name': 'position', 'grades': [{'id': 6, 'value': 7.0, 'date': '2024-01-15'}]},
+#     ]},
 # ]
 def _build_grades_response(grades):
-    cat_map = {}
-    for grade in grades:
-        _accumulate(cat_map, grade)
-    return _serialize(cat_map)
-
-
-def _accumulate(cat_map, grade):
-    subcategory = grade.subcategory
-    if subcategory.category.id not in cat_map:
-        cat_map[subcategory.category.id] = {"name": subcategory.category.name, "subs": {}}
-    subs = cat_map[subcategory.category.id]["subs"]
-    if subcategory.id not in subs:
-        subs[subcategory.id] = {"name": subcategory.name, "grades": []}
-    subs[subcategory.id]["grades"].append({"id": grade.id, "value": grade.value, "date": grade.date})
-
-
-def _serialize(cat_map):
     return [
         {
-            "category": cat["name"],
+            "category": category.name,
             "subcategories": [
-                {"id": sub_id, "name": sub["name"], "grades": sub["grades"]}
-                for sub_id, sub in sorted(cat["subs"].items())  # ascending sub_id
+                {
+                    "id": subcategory.id,
+                    "name": subcategory.name,
+                    "grades": [_build_grade_json(g) for g in sub_grades],
+                }
+                for subcategory, sub_grades in groupby(cat_grades, key=lambda g: g.subcategory)
             ],
         }
-        # cat_map: {cat_id: {"name": category name, "subs": {sub_id: {"name", "grades"}}}}, sorted by cat_id
-        for _, cat in sorted(cat_map.items())
+        # groupby merges only consecutive rows: the query's order_by keeps each category and subcategory together
+        for category, cat_grades in groupby(grades, key=lambda g: g.subcategory.category)
     ]
+
+
+def _build_grade_json(grade):
+    return {"id": grade.id, "value": grade.value, "date": grade.date}

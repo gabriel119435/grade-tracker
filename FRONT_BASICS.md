@@ -135,6 +135,34 @@ this project uses vite, the default for vue:
 - `npm run dev` serves the app and forwards `/api` to flask.
 - `npm run build` writes `dist/` for nginx.
 
+## linter and formatter
+
+### what it is
+
+- a linter reads code and reports bugs: an unused import, an undefined name, a broken template. like `ruff check`.
+- a formatter rewrites code into one fixed layout: indentation, quotes, line breaks. like `ruff format`.
+- both are `devDependencies`: they run on your machine and in the build, never in the browser.
+
+### why you need one
+
+- linter: a typo'd variable name formats fine and still ships broken, only a linter reports it before running.
+- formatter: without it, layout drifts with each editor and each dev, and diffs fill with spacing changes.
+- python has both in one tool, ruff. js splits them into two tools.
+
+### options
+
+- eslint: the standard js linter, plugins add vue (`eslint-plugin-vue`) and css (`@eslint/css`). bugs, not layout.
+- prettier: the standard formatter for js, vue, css, html and json. fixes layout, finds no bugs.
+- biome: linter and formatter in one tool, fast, vue support experimental.
+- oxlint and oxfmt: very fast, formatter in beta, vue support partial.
+- this project uses eslint for bugs and prettier for layout.
+
+### eslint and prettier together
+
+- eslint runs rules, one check each. its ready-made rule lists still hold a few layout rules, like `vue/html-indent`.
+- those fight prettier: one tool's fix makes the other one fail.
+- `eslint-config-prettier` turns off every eslint layout rule, so each tool keeps its own job.
+
 ## ui framework
 
 ### what it is
@@ -213,6 +241,8 @@ this project works this way.
 - build tool: vite, dev server and production build; others: webpack, rspack, parcel.
 - ui framework: vue, components and reactive state; others: react, svelte, angular, solid.
 - test runner: vitest, runs unit tests; others: jest.
+- linter: eslint, finds bugs; others: biome, oxlint.
+- formatter: prettier, fixes layout; others: biome, oxfmt.
 - production server: nginx, serves `dist/` and proxies `/api`; others: caddy, apache, any static host.
 
 ## startup sequence
@@ -563,7 +593,7 @@ grade-tracker examples:
     - a `watch` on `selectedStudentId` then loads that student's grades.
 - slot in `TabLayout.vue`: `<AppTopBar>` with the teacher's tab links between its tags.
     - fills the `<slot/>` of child `AppTopBar.vue` with those links.
-- action in `TeachersView.vue`: `<UserList ref="userList"/>`.
+- action in `AdminView.vue`: `<UserList ref="userList"/>`.
     - after a seed, calls `userList.value.load()`, opened by child `UserList.vue` with `defineExpose({load})`.
 - full chain: `DateInput.vue` -> `GradeForm.vue` -> `GradesView.vue`:
     - up:

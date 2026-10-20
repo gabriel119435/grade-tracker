@@ -1,14 +1,15 @@
-/* login page, centers the card on the viewport via fixed positioning */
+/* login page: fills the screen height, the card centers inside it and scrolls like any other page */
 .login-page {
-    position: fixed;
-    /* centering on both axes, see --center in variables.css */
-    top: var(--center);
-    left: var(--center);
-    transform: translate(var(--center-neg), var(--center-neg));
+    display: flex;
+    /* vh: viewport height, 1vh = 1% of the visible browser window height, 100vh = the full window height */
+    /* min-height = 100vh - --space-4 (body bottom padding in reset.css and mobile.css), no scroll on a tall screen */
+    min-height: calc(100vh - var(--space-4));
 }
 
 /* contained form box with shadow, login page */
 .login-card {
+    /* auto margins center the card, unlike justify-content they never push it past the top or left edge */
+    margin: auto;
     background: var(--color-bg-1);
     border-color: var(--color-b-0);
     padding: var(--space-5);

@@ -15,7 +15,7 @@ const display = ref(localizeDate(model.value, format.value))
 // true while the typed text is non-empty and not a valid date
 const hasError = ref(false)
 // computed so the message re-translates when the locale changes
-const error = computed(() => hasError.value ? t('date_input.invalid') : null)
+const error = computed(() => (hasError.value ? t('date_input.invalid') : null))
 
 // parent changed the date: show it in the locale format, a valid date clears the error
 // a change typed here comes back through v-model too, the check below skips it
@@ -54,7 +54,7 @@ function onInput(e) {
     emit('error', false)
     model.value = normalizedDate
   } else {
-    // the message shows as soon as anything is typed, an empty input only blocks save
+    // message shows only once something is typed, an empty input still reports an error to the parent
     hasError.value = display.value.length > 0
     emit('error', true)
   }

@@ -9,7 +9,7 @@ export async function saveGrades(studentId, date, upsertGrades, deleteGradeIds) 
             date,
             upsert_grades: upsertGrades,
             delete_grade_ids: deleteGradeIds,
-        })
+        }),
     })
 }
 

@@ -1,4 +1,4 @@
-from flask import jsonify, abort
+from flask import abort, jsonify
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash

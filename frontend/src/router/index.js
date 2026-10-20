@@ -5,7 +5,7 @@ import {i18n} from '../i18n.js'
 import BaseLayout from '../layouts/BaseLayout.vue'
 import TabLayout from '../layouts/TabLayout.vue'
 import LoginView from '../views/LoginView.vue'
-import TeachersView from '../views/admin/TeachersView.vue'
+import AdminView from '../views/admin/AdminView.vue'
 import CategoriesView from '../views/teacher/CategoriesView.vue'
 import StudentsView from '../views/teacher/StudentsView.vue'
 import TeacherGradesView from '../views/teacher/GradesView.vue'
@@ -19,10 +19,7 @@ const routes = [
         component: BaseLayout,
         // custom field read by navigationGuard: only this role may open the route and its children
         meta: {allowed_role: 'admin'},
-        children: [
-            {path: '', redirect: '/admin/teachers'},
-            {path: 'teachers', component: TeachersView}
-        ]
+        children: [{path: '', component: AdminView}],
     },
     {
         path: '/teacher',
@@ -32,30 +29,28 @@ const routes = [
             {path: '', redirect: '/teacher/categories'},
             {path: 'categories', component: CategoriesView},
             {path: 'students', component: StudentsView},
-            {path: 'grades', component: TeacherGradesView}
-        ]
+            {path: 'grades', component: TeacherGradesView},
+        ],
     },
     {
         path: '/student',
         component: BaseLayout,
         meta: {allowed_role: 'student'},
-        children: [
-            {path: '', component: StudentGradesView}
-        ]
+        children: [{path: '', component: StudentGradesView}],
     },
     {
         path: '/',
-        redirect: '/login'
+        redirect: '/login',
     },
     {
         path: '/login',
-        component: LoginView
-    }
+        component: LoginView,
+    },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
 })
 
 // runs before every routing, returns true if allowed, string url if redirected. exported for testing
