@@ -14,7 +14,7 @@ from app.models import AuthUser, User
 from app.routes.auth import DEFAULT_ADMIN_PASS, auth_bp
 from app.routes.categories import categories_bp
 from app.routes.grades import grades_bp
-from app.routes.seed import seed_bp
+from app.routes.seed import get_seed_pass, seed_bp
 from app.routes.students import students_bp
 from app.routes.teachers import teachers_bp
 from app.validation import password_error
@@ -28,6 +28,7 @@ def create_app():
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
     apply_migrations()
     _create_admin()  # needs the final schema, so it runs after every migration
+    get_seed_pass()  # fails startup on an invalid SEED_PASS, instead during first seed
 
     app = Flask(__name__)
     secret_key = os.environ.get("SECRET_KEY")

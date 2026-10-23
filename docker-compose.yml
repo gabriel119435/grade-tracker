@@ -7,6 +7,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY:-} # :- defaults to empty when unset, without compose warning
       - ADMIN_PASS=${ADMIN_PASS:-}
+      - SEED_PASS=${SEED_PASS:-}
       - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-}
       - FLASK_HOST=0.0.0.0
       - FLASK_DEBUG=0 # no reloader process, no debugger stack trace pages

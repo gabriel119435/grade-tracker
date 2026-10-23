@@ -50,6 +50,7 @@ cp .env.example .env
 |-------------------------|---------------------|------------------------------------------------------------|
 | `SECRET_KEY`            | `dev-default-value` | flask session signing                                      |
 | `ADMIN_PASS`            | `admin pass`        | initial admin password (set on first run)                  |
+| `SEED_PASS`             | `seed pass`         | password of every seeded user                              |
 | `SESSION_COOKIE_SECURE` | `0`                 | `1` sends the session cookie only over https               |
 | `FLASK_HOST`            | `127.0.0.1`         | flask bind address; set to `0.0.0.0` in docker via compose |
 | `FLASK_DEBUG`           | `1`                 | reloader and debugger; set to `0` in docker via compose    |
@@ -65,7 +66,7 @@ cp .env.example .env
 
 default admin account: `admin` / `admin pass`; password can be changed from the admin screen.
 
-seed button: wipes db except `admin`, then creates demo data; all seeded users log in with password `seed pass`.
+seed button: wipes db except `admin`, then creates demo data; all seeded users log in with `SEED_PASS`.
 
 ## entities
 

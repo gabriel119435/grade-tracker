@@ -1,11 +1,12 @@
 """
 admin only: wipes everything except user 'admin', then adds beach tennis demo data, in one transaction.
-- users: 5 teachers, 10 students, password 'seed pass', no first or last name repeated.
+- users: 5 teachers, 10 students, password from get_seed_pass(), no first or last name repeated.
 - categories: 10 shots, 50 subcategories (3 to 7 each).
 - grades: 5 students, one random teacher each, values 0.0 to 10.0. shuffled subcategories split in tiers:
   20% -> 60 grades (one per day), 20% -> 40, 50% -> 20 (random distinct days), 10% -> none.
 """
 
+import os
 import random
 from datetime import date, timedelta
 
@@ -16,10 +17,11 @@ from werkzeug.security import generate_password_hash
 from app.db import get_session
 from app.models import Category, Grade, Subcategory, User, wipe
 from app.routes.helpers.decorators import require_role
+from app.validation import password_error
 
 seed_bp = Blueprint("seed", __name__)
 
-SEED_PASS = "seed pass"
+DEFAULT_SEED_PASS = "seed pass"
 TEACHER_COUNT = 5
 STUDENT_COUNT = 10
 GRADED_STUDENT_COUNT = 5
@@ -120,9 +122,18 @@ def run_seed():
     }
 
 
+def get_seed_pass():
+    seed_pass = os.environ.get("SEED_PASS") or DEFAULT_SEED_PASS
+    # same rules as every other password, for both the env value and the default
+    error = password_error(seed_pass)
+    if error:
+        raise ValueError(f"SEED_PASS: {error}")
+    return seed_pass
+
+
 def _create_users(session):
-    # creates teachers and students with random unique names, all sharing SEED_PASS.
-    password_hash = generate_password_hash(SEED_PASS)
+    # creates teachers and students with random unique names, all sharing the seed password.
+    password_hash = generate_password_hash(get_seed_pass())
     names = _random_names(TEACHER_COUNT + STUDENT_COUNT)
 
     teachers = [User(username=n, password_hash=password_hash, role="teacher") for n in names[:TEACHER_COUNT]]
