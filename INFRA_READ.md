@@ -10,3 +10,4 @@ each new file builds on what came before; read them in order for the most cohere
 - `backend/Dockerfile`: multi-stage build with base, test and runtime stages
 - `frontend/Dockerfile`: multi-stage build with base, test, build and runtime stages
 - `docker-compose.yml`: exposes nginx, keeps flask internal, named sqlite volume and sets hardware limits
+- `docker-compose.cloudflare.yml`: pi-only overlay, drops nginx's host port and joins it to cloudflared's edge-network

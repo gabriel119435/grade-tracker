@@ -43,6 +43,11 @@ def _get_day_grades(client, student_id, date):
     return client.get(f"/api/students/{student_id}/grades/{date}")
 
 
+def _get_day_grade_id(client, grade_context, date=DEFAULT_DAY):
+    day_grades = _get_day_grades(client, grade_context["student1_id"], date).get_json()
+    return day_grades[str(grade_context["subcategory1_id"])]["id"]
+
+
 def _assert_error(res, status, error):
     assert res.status_code == status
     assert res.get_json() == {"error": error}
@@ -61,7 +66,7 @@ def _make_daily_dates(count):
 def _create_grade(client, grade_context):
     # saves one grade as the logged-in teacher and returns its id
     _assert_saved(_save_grades(client, _get_upsert_payload(grade_context)))
-    return _get_first_subcategory_grades(client, grade_context)[0]["id"]
+    return _get_day_grade_id(client, grade_context)
 
 
 def _insert_grades(grade_context, dates, subcategory_key="subcategory1_id"):
@@ -234,7 +239,7 @@ def test_save_upserts_and_deletes_together(client, grade_context):
     # one request deletes the subcategory1 grade of another day and creates a subcategory2 grade on DEFAULT_DAY
     _insert_grades(grade_context, ["2024-01-10"])
     login(client)
-    grade_id = _get_first_subcategory_grades(client, grade_context)[0]["id"]
+    grade_id = _get_day_grade_id(client, grade_context, "2024-01-10")
     payload = {
         **_get_upsert_payload(grade_context, 7.0, subcategory_id=grade_context["subcategory2_id"]),
         "delete_grade_ids": [grade_id],
@@ -376,14 +381,10 @@ def test_history_returns_nested_response(client, grade_context):
     _insert_grades(grade_context, ["2024-01-03"], "subcategory3_id")
     _insert_grades(grade_context, ["2024-01-02", "2024-01-01"], "subcategory2_id")
     _insert_grades(grade_context, ["2024-01-04", "2024-01-01"])
-    with get_session() as session:
-        rows = session.execute(select(Grade.subcategory_id, Grade.date, Grade.id)).all()
-    ids = {(subcategory_id, date): grade_id for subcategory_id, date, grade_id in rows}
 
     def make_expected_subcategory(key, name, dates):
-        subcategory_id = grade_context[key]
-        grades = [{"id": ids[subcategory_id, date], "value": 5.0, "date": date} for date in dates]
-        return {"id": subcategory_id, "name": name, "grades": grades}
+        grades = [{"value": 5.0, "date": date} for date in dates]
+        return {"id": grade_context[key], "name": name, "grades": grades}
 
     login(client)
     assert _get_history(client, grade_context) == [

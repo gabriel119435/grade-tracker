@@ -2,10 +2,6 @@
 
 ## pending
 
-- cloudflare tunnel deploy, both before the first deploy, per-ip limits (login included) need the real visitor ip:
-    - `nginx.conf`: replace `CLOUDFLARED_IP` in the disabled realip lines above `location /api/` and uncomment them
-    - `.env`: set `SESSION_COOKIE_SECURE=1`, session cookie only travels over https
-
 ## future
 
 - stale tab writes issue: a tab left open across another tab's login writes as the new user

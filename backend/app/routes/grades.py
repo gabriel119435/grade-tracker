@@ -209,10 +209,10 @@ def get_student_grades(student_id):
 # nests the sorted flat grades into the structure the frontend expects:
 # [
 #     {'category': 'forehand', 'subcategories': [
-#         {'id': 10, 'name': 'spin', 'grades': [{'id': 5, 'value': 8.5, 'date': '2024-01-15'}]},
+#         {'id': 10, 'name': 'spin', 'grades': [{'value': 8.5, 'date': '2024-01-15'}]},
 #     ]},
 #     {'category': 'serve', 'subcategories': [
-#         {'id': 20, 'name': 'position', 'grades': [{'id': 6, 'value': 7.0, 'date': '2024-01-15'}]},
+#         {'id': 20, 'name': 'position', 'grades': [{'value': 7.0, 'date': '2024-01-15'}]},
 #     ]},
 # ]
 def _build_grades_response(grades):
@@ -234,4 +234,4 @@ def _build_grades_response(grades):
 
 
 def _build_grade_json(grade):
-    return {"id": grade.id, "value": grade.value, "date": grade.date}
+    return {"value": grade.value, "date": grade.date}

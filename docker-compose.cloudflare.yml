@@ -1,0 +1,12 @@
+services:
+  nginx-frontend:
+    ports: !reset []
+    networks:
+      default:
+      edge-network:
+        aliases:
+          - grade-tracker
+
+networks:
+  edge-network:
+    external: true
