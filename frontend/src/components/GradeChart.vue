@@ -14,7 +14,7 @@ import {localizeDate} from '../utils/dateUtils.js'
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
 
 const props = defineProps({
-  // one subcategory's last n grades, oldest first: [{id: 10, date: '2024-01-31', value: 7.5}]
+  // one subcategory's last n grades, oldest first: [{date: '2024-01-31', value: 7.5}]
   grades: {type: Array, required: true},
 })
 

@@ -77,7 +77,7 @@ docker compose exec flask-backend python create_arena.py <arena> <admin> <passwo
 | teacher | `/teacher/categories` | manage categories, students, and grades                       |
 | student | `/student`            | view own grades as charts                                     |
 
-default admin account: `admin` / `admin pass` in arena `arena`; password can be changed from the admin screen.
+default admin account: `DEFAULT_ADMIN_NAME` / `DEFAULT_ADMIN_PASS` in arena `DEFAULT_ARENA_NAME`.
 
 seed button: wipes the admin's arena except the admin, then creates demo data; seeded users use `DEFAULT_SEED_PASS`.
 

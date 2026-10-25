@@ -5,6 +5,7 @@ from app.db import Base, engine
 
 
 # migrations are by default idempotent, are always applied on startup
+# no deployed db predates arenas
 def apply_migrations():
     _migration_000_create_db()
     _migration_001_add_locale()

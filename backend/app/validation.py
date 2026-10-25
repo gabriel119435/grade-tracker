@@ -1,5 +1,3 @@
-from flask import abort
-
 from app.constants import (
     NAME_MAX_LENGTH,
     NAME_WORD_MAX_LENGTH,
@@ -42,13 +40,14 @@ def _has_long_word(text):
     return any(len(word) > NAME_WORD_MAX_LENGTH for word in text.split())
 
 
-def validate_word_size(text):
-    if _has_long_word(text):
-        abort(400, "word_too_long")
-
-
-# category and subcategory names: length and word size, caller checks empty first
-def validate_name(name):
+def name_error(name):
+    """
+    checks category and subcategory name rules: length and word size.
+    name: str stripped name, not empty, caller checks empty first.
+    returns: str | None error code, None if valid.
+    """
     if len(name) > NAME_MAX_LENGTH:
-        abort(400, "name_too_long")
-    validate_word_size(name)
+        return "name_too_long"
+    if _has_long_word(name):
+        return "word_too_long"
+    return None

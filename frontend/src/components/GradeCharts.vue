@@ -7,7 +7,7 @@ import LoadError from './LoadError.vue'
 import {localizeGrade} from '../utils/gradeUtils.js'
 
 const props = defineProps({
-  // [{category: 'serve', subcategories: [{id: 3, name: 'slice', grades: [{id, date, value}]}]}]
+  // [{category: 'serve', subcategories: [{id: 3, name: 'slice', grades: [{date, value}]}]}]
   grades: {type: Array, required: true},
 
   // true when the chart load failed, shows an inline message and a retry button instead of the charts
@@ -42,7 +42,7 @@ const categoryAverages = computed(() => {
       continue
     }
     const average = latestValues.reduce((a, b) => a + b, 0) / latestValues.length
-    result[cat.category] = localizeGrade(average.toFixed(1), separator.value)
+    result[cat.category] = localizeGrade(Number(average.toFixed(1)), separator.value)
   }
   return result
 })

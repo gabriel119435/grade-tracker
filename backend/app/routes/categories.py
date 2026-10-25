@@ -8,7 +8,7 @@ from app.db import get_session
 from app.models import Category, Subcategory
 from app.routes.helpers.decorators import require_role
 from app.routes.helpers.payload import get_body, get_int, get_str
-from app.validation import validate_name
+from app.validation import name_error
 
 categories_bp = Blueprint("categories", __name__)
 
@@ -45,7 +45,9 @@ def create_category():
     if not name:
         abort(400, "name_required")
 
-    validate_name(name)
+    error = name_error(name)
+    if error:
+        abort(400, error)
 
     try:
         with get_session(write=True) as session:
@@ -77,7 +79,9 @@ def create_subcategory():
     if not name or not category_id:
         abort(400, "name_and_category_required")
 
-    validate_name(name)
+    error = name_error(name)
+    if error:
+        abort(400, error)
 
     try:
         with get_session(write=True) as session:

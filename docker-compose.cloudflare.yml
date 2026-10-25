@@ -1,6 +1,9 @@
+# cloudflared runs from its own compose file and forwards the tunnel's public traffic into edge-network
 services:
   nginx-frontend:
+    # !reset drops the base file's 80:80 instead of merging it: no host port, the tunnel is the only way in
     ports: !reset []
+    # default reaches flask-backend, edge-network lets cloudflared reach nginx as http://grade-tracker:80
     networks:
       default:
       edge-network:
@@ -8,5 +11,6 @@ services:
           - grade-tracker
 
 networks:
+  # external: joins the edge-network cloudflared is on, otherwise compose makes a new one only this project sees
   edge-network:
     external: true

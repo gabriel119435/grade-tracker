@@ -3,7 +3,7 @@ import {computed, ref} from 'vue'
 
 // custom select: shows a list of options, the picked option's value goes to the parent's v-model
 // every option has a value (stored in model, ex: 3) and a label (shown on screen, ex: 'alice')
-// options come as objects {value, label} (student selector) or strings (locale picker: value = label = 'en')
+// options come as objects {value, label} (student and arena selectors) or strings (locale picker: value = label = 'en')
 // optValue and optLabel read either shape, selectedOption maps the stored value back to its option for the label
 
 const props = defineProps({
