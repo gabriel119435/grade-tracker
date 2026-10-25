@@ -1,27 +1,26 @@
 """
-admin only: wipes everything except user 'admin', then adds beach tennis demo data, in one transaction.
-- users: 5 teachers, 10 students, password from get_seed_pass(), no first or last name repeated.
-- categories: 10 shots, 50 subcategories (3 to 7 each).
+admin only: wipes admin's own arena except the admin user, then adds beach tennis demo data, in one transaction.
+- users: 5 teachers, 10 students, password DEFAULT_SEED_PASS from settings.py, no first or last name repeated.
+- categories: 10 shots, 44 subcategories (2 to 6 each).
 - grades: 5 students, one random teacher each, values 0.0 to 10.0. shuffled subcategories split in tiers:
   20% -> 60 grades (one per day), 20% -> 40, 50% -> 20 (random distinct days), 10% -> none.
 """
 
-import os
 import random
 from datetime import date, timedelta
 
 from flask import Blueprint, jsonify
+from flask_login import current_user
 from sqlalchemy import insert
 from werkzeug.security import generate_password_hash
 
 from app.db import get_session
 from app.models import Category, Grade, Subcategory, User, wipe
 from app.routes.helpers.decorators import require_role
-from app.validation import password_error
+from app.settings import DEFAULT_SEED_PASS
 
 seed_bp = Blueprint("seed", __name__)
 
-DEFAULT_SEED_PASS = "seed pass"
 TEACHER_COUNT = 5
 STUDENT_COUNT = 10
 GRADED_STUDENT_COUNT = 5
@@ -74,18 +73,29 @@ LAST_NAMES = [
     "carvalho",
 ]
 
-# category -> subcategories, 50 subcats in total so the grade tier percentages split evenly
 CATEGORIES = {
-    "saque": ["chapado", "com slice", "com topspin", "curto", "por baixo", "no corpo"],
-    "recepção": ["de voleio", "bloqueada", "em lob", "curta", "agressiva"],
-    "forehand": ["cruzado", "paralelo", "acelerado", "com topspin", "de defesa", "na meia altura"],
-    "backhand": ["cruzado", "paralelo", "bloqueio", "cortado", "de defesa", "na meia altura"],
-    "voleio": ["de forehand", "de backhand", "alto", "baixo", "de toque", "angulado", "de bloqueio"],
-    "smash": ["chapado", "com efeito", "diagonal", "defensivo", "de fundo"],
-    "lob": ["defensivo", "ofensivo", "alto", "curto", "cruzado"],
-    "gancho": ["na rede", "de fundo", "angulado"],
-    "verônica": ["na rede", "de fundo", "angulado"],
-    "curta": ["de forehand", "de backhand", "de voleio", "cruzada"],
+    "saque": ["chapado", "chapado lob", "top spin", "top spin lob", "por baixo", "swing volley"],
+    "recepção": ["alta de forehand", "baixa de forehand", "alta de backhand", "baixa de backhand", "split step"],
+    "forehand": ["acelerada", "swing volley", "peixinho", "anômalo", "defesa alta", "defesa baixa"],
+    "backhand": ["acelerada", "swing volley", "peixinho", "defesa alta", "defesa baixa"],
+    "voleio": [
+        "alto de forehand",
+        "alto de forehand top spin",
+        "alto de backhand",
+        "baixo de forehand",
+        "baixo de backhand",
+        "bloqueio",
+    ],
+    "smash": ["smash", "smash drop", "smash lob"],
+    "lob": [
+        "voleio alto de forehand",
+        "voleio alto de backhand",
+        "voleio baixo de forehand",
+        "voleio baixo de backhand",
+    ],
+    "gancho": ["gancho", "gancho lob", "gancho drop"],
+    "verônica": ["verônica", "verônica lob"],
+    "curta": ["de forehand", "de backhand", "voleio alto de forehand", "voleio alto de backhand"],
 }
 
 DAY1 = date(2025, 5, 25)
@@ -99,18 +109,20 @@ GRADE_TIERS = [(20, 60), (20, 40), (50, 20), (10, 0)]
 @seed_bp.route("/api/admin/seed", methods=["POST"])
 @require_role("admin")
 def seed():
-    return jsonify(run_seed())
+    return jsonify(run_seed(current_user.arena_id))
 
 
-def run_seed():
+def run_seed(arena_id):
     """
-    wipes the db, keeping only the admin user, then creates users, categories, subcategories and grades.
+    wipes one arena, keeping its admin user, then creates its users, categories, subcategories and grades.
+    other arenas are never touched.
+    arena_id: int the arena to wipe and fill.
     returns counts of created rows, keys teachers, students, categories, subcategories, grades.
     """
     with get_session(write=True) as session:
-        wipe(session)
-        teacher_ids, student_ids = _create_users(session)
-        subcat_ids = _create_categories(session)
+        wipe(session, arena_id)
+        teacher_ids, student_ids = _create_users(session, arena_id)
+        subcat_ids = _create_categories(session, arena_id)
         grade_count = _create_grades(session, teacher_ids, student_ids, subcat_ids)
 
     return {
@@ -122,22 +134,16 @@ def run_seed():
     }
 
 
-def get_seed_pass():
-    seed_pass = os.environ.get("SEED_PASS") or DEFAULT_SEED_PASS
-    # same rules as every other password, for both the env value and the default
-    error = password_error(seed_pass)
-    if error:
-        raise ValueError(f"SEED_PASS: {error}")
-    return seed_pass
-
-
-def _create_users(session):
-    # creates teachers and students with random unique names, all sharing the seed password.
-    password_hash = generate_password_hash(get_seed_pass())
+def _create_users(session, arena_id):
+    # creates the arena's teachers and students with random unique names, all sharing the seed password.
+    password_hash = generate_password_hash(DEFAULT_SEED_PASS)
     names = _random_names(TEACHER_COUNT + STUDENT_COUNT)
 
-    teachers = [User(username=n, password_hash=password_hash, role="teacher") for n in names[:TEACHER_COUNT]]
-    students = [User(username=n, password_hash=password_hash, role="student") for n in names[TEACHER_COUNT:]]
+    def make(name, role):
+        return User(arena_id=arena_id, username=name, password_hash=password_hash, role=role)
+
+    teachers = [make(n, "teacher") for n in names[:TEACHER_COUNT]]
+    students = [make(n, "student") for n in names[TEACHER_COUNT:]]
     session.add_all(teachers + students)
     session.flush()  # assigns ids
 
@@ -151,11 +157,11 @@ def _random_names(count):
     return [f"{first} {last}" for first, last in zip(firsts, lasts)]
 
 
-def _create_categories(session):
-    # creates every cat in CATEGORIES with its subcats.
+def _create_categories(session, arena_id):
+    # creates every cat in CATEGORIES with its subcats in the arena.
     subcategories = []
     for cat_name, subcat_names in CATEGORIES.items():
-        cat = Category(name=cat_name)
+        cat = Category(name=cat_name, arena_id=arena_id)
         session.add(cat)
         session.flush()  # assigns cat.id
 

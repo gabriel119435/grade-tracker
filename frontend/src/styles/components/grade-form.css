@@ -1,12 +1,3 @@
-/* card wrapping the entire grade input form */
-.form-card {
-    background: var(--color-bg-2);
-    border-color: var(--color-b-0);
-    padding: var(--space-3);
-    align-items: center;
-    gap: var(--space-3);
-}
-
 /* date label and input grouped together, sits inside form-card so one step darker */
 .date-field {
     display: flex;
@@ -33,10 +24,6 @@
 
 /* card for each category and its subcategory inputs, sits inside form-card so one step darker */
 .category-block {
-    background: var(--color-bg-3);
-    border-color: var(--color-b-1);
-    padding: var(--space-3);
-    align-items: center;
     gap: var(--space-2);
 }
 

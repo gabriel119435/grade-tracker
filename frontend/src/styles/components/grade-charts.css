@@ -1,11 +1,5 @@
-/* large outer card holding all grade history charts
-   two steps darker than the page background (bg-2 on bg-0) to separate it from the page */
+/* large outer card holding all grade history charts */
 .history-card {
-    background: var(--color-bg-2);
-    border-color: var(--color-b-0);
-    padding: var(--space-3);
-    align-items: center;
-    gap: var(--space-3);
     width: 100%;
 }
 
@@ -48,12 +42,8 @@
 
 /* card grouping all subcategory charts for one category */
 .category-card {
-    background: var(--color-bg-3);
-    border-color: var(--color-b-1);
-    padding: var(--space-3);
     /* shrinks to content width, works because chart-card has a fixed width */
     width: fit-content;
-    align-items: center;
     gap: var(--space-3);
 }
 

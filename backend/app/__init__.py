@@ -6,29 +6,32 @@ from flask import Flask, jsonify
 from flask_login import LoginManager
 from sqlalchemy import select
 from werkzeug.exceptions import HTTPException
-from werkzeug.security import generate_password_hash
 
+from app.arena import create_arena
 from app.db import get_session
 from app.migrations import apply_migrations
-from app.models import AuthUser, User
-from app.routes.auth import DEFAULT_ADMIN_PASS, auth_bp
+from app.models import Arena, AuthUser, User
+from app.routes.arenas import arenas_bp
+from app.routes.auth import auth_bp
 from app.routes.categories import categories_bp
 from app.routes.grades import grades_bp
-from app.routes.seed import get_seed_pass, seed_bp
+from app.routes.seed import seed_bp
 from app.routes.students import students_bp
 from app.routes.teachers import teachers_bp
-from app.validation import password_error
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS, DEFAULT_ARENA_NAME, check_settings
 
 login_manager = LoginManager()
 logger = logging.getLogger(__name__)
 
 
 def create_app():
-    # same as flask default format: [2026-09-28 16:26:08,926] INFO in __init__: admin created
+    # same as flask default format: [2026-09-28 16:26:08,926] INFO in __init__: default arena created
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
+    # fails startup on an invalid env value, before any of them is used
+    check_settings()
     apply_migrations()
-    _create_admin()  # needs the final schema, so it runs after every migration
-    get_seed_pass()  # fails startup on an invalid SEED_PASS, instead during first seed
+    # needs the final schema, so it runs after every migration
+    _create_default_arena()
 
     app = Flask(__name__)
     secret_key = os.environ.get("SECRET_KEY")
@@ -73,33 +76,18 @@ def create_app():
     return app
 
 
-# data step, not a migration: runs on every startup, creates the admin only if missing
-def _create_admin():
-    with get_session(write=True) as session:
-        if session.scalar(select(User).filter_by(username="admin")):
-            # admin already exists, ADMIN_PASS is not read
+# data step, not a migration: runs on every startup, creates the default arena and its admin only on an empty db
+def _create_default_arena():
+    with get_session() as session:
+        # any arena exists, DEFAULT_ARENA_NAME, DEFAULT_ADMIN_NAME and DEFAULT_ADMIN_PASS are not used
+        if session.scalar(select(Arena.id)):
             return
-        session.add(
-            User(
-                username="admin",
-                password_hash=generate_password_hash(_get_admin_pass()),
-                role="admin",
-            )
-        )
-    logger.info("admin created")
-
-
-def _get_admin_pass():
-    # ADMIN_PASS unset or empty: DEFAULT_ADMIN_PASS from routes/auth.py
-    admin_pass = os.environ.get("ADMIN_PASS") or DEFAULT_ADMIN_PASS
-    # same rules as every other password, for both the env value and the default
-    error = password_error(admin_pass)
-    if error:
-        raise ValueError(f"ADMIN_PASS: {error}")
-    return admin_pass
+    create_arena(DEFAULT_ARENA_NAME, DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS)
+    logger.info("default arena created")
 
 
 def _register_blueprints(app):
+    app.register_blueprint(arenas_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(teachers_bp)
     app.register_blueprint(students_bp)

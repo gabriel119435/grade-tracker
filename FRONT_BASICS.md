@@ -718,7 +718,7 @@ export function useCounter() {
 
 - `:root {--color-bg-action-0: #e8845a}` defines a token.
 - `.btn-primary {background: var(--color-bg-action-0)}` uses it.
-- `@media (max-width: 800px) {...}` holds narrow screen rules. variables work inside, not in the condition.
+- `@media (max-width: 1200px) {...}` holds narrow screen rules. variables work inside, not in the condition.
 - css cannot color a `<canvas>`: chart.js paints pixels there with js.
 - so the chart reads it in js: `getComputedStyle(document.documentElement).getPropertyValue('--color-b-2')`.
 - `getComputedStyle` is a browser function, no import. `document.documentElement` is `<html>`, what `:root` targets.

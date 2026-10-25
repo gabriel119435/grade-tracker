@@ -14,9 +14,9 @@ FROM b-base AS b-runtime
 # forces docker to build test stage first; failing checks block runtime
 COPY --from=b-test /app/.test-passed /tmp/.test-passed
 RUN uv sync --no-dev --frozen
-# runtime needs only the app package and its entry point, tests stay in b-test
+# runtime needs only the app package, its entry point and the arena cli, tests stay in b-test
 COPY app/ app/
-COPY run.py .
+COPY run.py create_arena.py ./
 RUN useradd --system --no-create-home non_root_backend_user && mkdir /data && chown non_root_backend_user /data
 USER non_root_backend_user
 EXPOSE 5000

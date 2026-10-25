@@ -96,7 +96,7 @@ async function handleDeleteSubcategory(id) {
         :key="cat.id"
         class="list-card category-management"
       >
-        <div class="category-header">
+        <div class="item-row">
           <strong class="wrap-name">{{ cat.name }}</strong>
           <!-- 'cat-' and 'sub-' prefixes keep category and subcategory ids apart in the shared pendingId -->
           <ConfirmButton

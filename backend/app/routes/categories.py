@@ -1,4 +1,5 @@
 from flask import Blueprint, abort, jsonify
+from flask_login import current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
@@ -18,6 +19,7 @@ def get_categories():
     with get_session() as session:
         categories = session.scalars(
             select(Category)
+            .where(Category.arena_id == current_user.arena_id)
             # loads eagerly preventing N+1
             .options(selectinload(Category.subcategories))
             .order_by(Category.id)
@@ -47,9 +49,10 @@ def create_category():
 
     try:
         with get_session(write=True) as session:
-            session.add(Category(name=name))
+            session.add(Category(name=name, arena_id=current_user.arena_id))
         return jsonify({"message": "created"}), 201
     except IntegrityError:
+        # category names are unique per arena
         abort(409, "category_exists")
 
 
@@ -58,7 +61,7 @@ def create_category():
 def delete_category(category_id):
     with get_session(write=True) as session:
         cat = session.get(Category, category_id)
-        if not cat:
+        if not cat or cat.arena_id != current_user.arena_id:
             abort(404, "not_found")
         session.delete(cat)
 
@@ -78,7 +81,8 @@ def create_subcategory():
 
     try:
         with get_session(write=True) as session:
-            if not session.get(Category, category_id):
+            category = session.get(Category, category_id)
+            if not category or category.arena_id != current_user.arena_id:
                 abort(404, "not_found")
             session.add(Subcategory(name=name, category_id=category_id))
         return jsonify({"message": "created"}), 201
@@ -91,7 +95,7 @@ def create_subcategory():
 def delete_subcategory(subcategory_id):
     with get_session(write=True) as session:
         subcategory = session.get(Subcategory, subcategory_id)
-        if not subcategory:
+        if not subcategory or subcategory.category.arena_id != current_user.arena_id:
             abort(404, "not_found")
         session.delete(subcategory)
 

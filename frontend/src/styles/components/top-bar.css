@@ -1,9 +1,9 @@
 /* all layouts: admin, teacher, student
-   full-width bar at the top of every page with 3 columns: username | nav tabs | locale+logout */
+   full-width bar at the top of every page with 3 columns: arena+locale | nav tabs | username+logout */
 .top-bar {
     display: grid;
     /* 1fr auto 1fr: center column sized to content, the two outer columns share the rest equally
-       so the center stays truly centered, however wide the username or the right controls are */
+       so the center stays truly centered, however wide the names or the controls are */
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     background: var(--color-bg-1);
@@ -17,10 +17,21 @@
     text-align: left;
 }
 
-/* left grid column: the logged-in username as a pill */
+/* side grid columns: arena and locale on the left, username and logout on the right */
+.top-bar-left,
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* don't stretch across the 1fr column, mirror of justify-self: end on .top-bar-right */
 .top-bar-left {
-    /* don't stretch across the 1fr column, mirror of justify-self: end on .top-bar-right */
     justify-self: start;
+}
+
+/* one name in a side column: the arena on the left, the logged-in username on the right */
+.top-bar-pill {
     color: var(--color-fg-2);
     border: var(--border-width) solid var(--color-b-0);
     border-radius: var(--border-radius-0);
@@ -61,11 +72,7 @@
     font-weight: var(--font-weight-medium);
 }
 
-/* right grid column: locale dropdown and logout button */
+/* pushed to the far right of its 1fr column */
 .top-bar-right {
-    display: flex;
-    align-items: center;
-    /* pushed to the far right of its 1fr column */
     justify-self: end;
-    gap: var(--space-2);
 }

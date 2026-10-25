@@ -10,6 +10,8 @@ export default {
     },
     login: {
         title: 'login',
+        arena: 'pick an arena',
+        arenas_failed: 'could not load the arenas',
         username: 'username',
         password: 'password',
         submit: 'log in',

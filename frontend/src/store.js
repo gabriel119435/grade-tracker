@@ -3,7 +3,7 @@ import {i18n} from './i18n.js'
 import {DEFAULT_LOCALE} from './constants.js'
 
 export const store = reactive({
-    // {id: 1, username: 'admin', role: 'admin', locale: 'en'} or null if logged out
+    // {id: 1, username: 'admin', role: 'admin', locale: 'en', arena_name: 'arena'} or null if logged out
     user: null,
     // true once getMe() answered, false again after clearSession()
     sessionLoaded: false,

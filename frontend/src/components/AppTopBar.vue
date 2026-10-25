@@ -41,20 +41,25 @@ async function handleLogout() {
 
 <template>
   <nav class="top-bar">
-    <span class="top-bar-left">{{ store.user?.username }}</span>
-    <div class="top-bar-center">
-      <slot />
-    </div>
-    <div class="top-bar-right">
+    <!-- left: arena and locale, the context of the session -->
+    <div class="top-bar-left">
+      <span class="top-bar-pill top-bar-arena">{{ store.user?.arena_name }}</span>
       <!-- v-model split in two: a change must go through handleLocaleChange, which saves it and can revert it -->
       <AppDropdown
-        class="app-select-compact"
+        class="app-select-compact top-bar-locale"
         :model-value="locale"
         :options="LOCALES"
         @update:model-value="handleLocaleChange"
       />
+    </div>
+    <div class="top-bar-center">
+      <slot />
+    </div>
+    <!-- right: the logged-in user and the logout acting on it -->
+    <div class="top-bar-right">
+      <span class="top-bar-pill top-bar-user">{{ store.user?.username }}</span>
       <button
-        class="btn-danger"
+        class="btn-danger top-bar-logout"
         type="button"
         :disabled="loading"
         @click="handleLogout"

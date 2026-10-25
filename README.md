@@ -42,19 +42,32 @@ to set your own values, copy `.env.example` to `.env` and edit it:
 cp .env.example .env
 ```
 
-`ADMIN_PASS` is only read when db is built.
+`DEFAULT_ARENA_NAME`, `DEFAULT_ADMIN_NAME` and `DEFAULT_ADMIN_PASS` are only used when db is built.
+an unset or empty var falls back to its default below.
 
 ## env vars
 
 | var                     | default             | used in                                                    |
 |-------------------------|---------------------|------------------------------------------------------------|
 | `SECRET_KEY`            | `dev-default-value` | flask session signing                                      |
-| `ADMIN_PASS`            | `admin pass`        | initial admin password (set on first run)                  |
-| `SEED_PASS`             | `seed pass`         | password of every seeded user                              |
 | `SESSION_COOKIE_SECURE` | `0`                 | `1` sends the session cookie only over https               |
+| `DEFAULT_ARENA_NAME`    | `arena de teste`    | initial arena name (set on first run)                      |
+| `DEFAULT_ADMIN_NAME`    | `administrador`     | initial admin username (set on first run)                  |
+| `DEFAULT_ADMIN_PASS`    | `senha primaria`    | initial admin password (set on first run)                  |
+| `DEFAULT_SEED_PASS`     | `senha secundaria`  | password of every seeded user                              |
 | `FLASK_HOST`            | `127.0.0.1`         | flask bind address; set to `0.0.0.0` in docker via compose |
 | `FLASK_DEBUG`           | `1`                 | reloader and debugger; set to `0` in docker via compose    |
 | `DATABASE_URL`          | `backend/app.db`    | sqlalchemy db url; docker points it to the `/data` volume  |
+
+## arenas
+
+each arena is fully isolated: its users, categories and grades are invisible to every other arena.
+each arena has exactly one admin.
+
+```bash
+cd backend && uv run create_arena.py <arena> <admin> <password>                     # local
+docker compose exec flask-backend python create_arena.py <arena> <admin> <password> # docker
+```
 
 ## roles
 
@@ -64,12 +77,13 @@ cp .env.example .env
 | teacher | `/teacher/categories` | manage categories, students, and grades                       |
 | student | `/student`            | view own grades as charts                                     |
 
-default admin account: `admin` / `admin pass`; password can be changed from the admin screen.
+default admin account: `admin` / `admin pass` in arena `arena`; password can be changed from the admin screen.
 
-seed button: wipes db except `admin`, then creates demo data; all seeded users log in with `SEED_PASS`.
+seed button: wipes the admin's arena except the admin, then creates demo data; seeded users use `DEFAULT_SEED_PASS`.
 
 ## entities
 
+- **arena**: outermost entity, every user and category belongs to one arena
 - **category**: top-level grouping (e.g. serve)
 - **subcategory**: belongs to a category (e.g. strength); each gets its own line chart
 - **grade**: value 0.0–10.0 with one decimal, tied from a teacher to a student + subcategory + date

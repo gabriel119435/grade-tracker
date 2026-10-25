@@ -8,7 +8,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import contains_eager
 
 from app.db import get_session
-from app.models import Grade, Subcategory, User
+from app.models import Category, Grade, Subcategory, User
 from app.routes.helpers.decorators import require_role
 from app.routes.helpers.payload import get_body, get_int, get_list, get_str, is_number
 
@@ -57,10 +57,10 @@ def _validate_date(grade_date):
         abort(400, "invalid_date_format")
 
 
-# missing id or a non student id: same error for every grade route
+# missing id, a non student id or another arena's student: same error for every grade route
 def _check_student(session, student_id):
     student = session.get(User, student_id)
-    if not student or student.role != "student":
+    if not student or student.role != "student" or student.arena_id != current_user.arena_id:
         abort(404, "not_found")
 
 
@@ -68,7 +68,16 @@ def _upsert_grades(session, student_id, grade_date, upsert_grades):
     if not all(isinstance(grade, dict) for grade in upsert_grades):
         abort(400, "invalid_payload")
     subcategory_ids = [get_int(grade, "subcategory_id") for grade in upsert_grades]
-    valid_subcat_ids = set(session.scalars(select(Subcategory.id).where(Subcategory.id.in_(subcategory_ids))))
+    valid_subcat_ids = set(
+        session.scalars(
+            select(Subcategory.id)
+            .join(Subcategory.category)
+            .where(
+                Subcategory.id.in_(subcategory_ids),
+                Category.arena_id == current_user.arena_id,
+            )
+        )
+    )
 
     # validate all entries before writing anything, prevents partial commits
     validated = []

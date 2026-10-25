@@ -3,15 +3,19 @@ from datetime import timedelta
 
 import pytest
 from sqlalchemy import insert, select
+from werkzeug.security import generate_password_hash
 
+from app.arena import create_arena
 from app.db import get_session
-from app.models import Grade
-from app.routes.auth import DEFAULT_ADMIN_PASS
-from tests.helpers import login
+from app.models import Arena, Category, Grade, Subcategory, User
+from app.settings import DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS
+from tests.helpers import PASSWORD, login
 
 DEFAULT_DAY = "2024-01-15"
 # id that no row has, for not found cases
 MISSING_ID = 1000
+# second arena name, built by _make_other_arena
+OTHER_ARENA = "arena2"
 
 
 def _save_grades(client, payload):
@@ -85,6 +89,23 @@ def _insert_grades(grade_context, dates, subcategory_key="subcategory1_id"):
                 for date in dates
             ],
         )
+
+
+def _make_other_arena():
+    # second arena reusing grade_context's names: teacher1, student1, serve and slice
+    create_arena(OTHER_ARENA, DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS)
+    with get_session(write=True) as session:
+        arena_id = session.scalar(select(Arena.id).filter_by(name=OTHER_ARENA))
+        p_hash = generate_password_hash(PASSWORD)
+        teacher = User(arena_id=arena_id, username="teacher1", password_hash=p_hash, role="teacher")
+        student = User(arena_id=arena_id, username="student1", password_hash=p_hash, role="student")
+        category = Category(name="serve", arena_id=arena_id)
+        session.add_all([teacher, student, category])
+        session.flush()
+        subcategory = Subcategory(name="slice", category_id=category.id)
+        session.add(subcategory)
+        session.flush()
+        return {"student_id": student.id, "subcategory_id": subcategory.id}
 
 
 @pytest.mark.parametrize("date", [None, ""])
@@ -405,8 +426,36 @@ def test_history_returns_nested_response(client, grade_context):
 def test_teacher_delete_removes_their_grades(client, grade_context):
     # teacher1 saves a grade, then admin deletes teacher1: the grade goes with them
     _insert_grades(grade_context, [DEFAULT_DAY])
-    login(client, "admin", DEFAULT_ADMIN_PASS)
+    login(client, DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_PASS)
     res = client.delete(f"/api/teachers/{grade_context['teacher1_id']}")
     assert res.status_code == 200
     login(client, "teacher2")
     assert _get_history(client, grade_context) == []
+
+
+def test_save_rejects_other_arena_student(client, grade_context):
+    other = _make_other_arena()
+    login(client)
+    payload = {**_get_upsert_payload(grade_context), "student_id": other["student_id"]}
+    _assert_error(_save_grades(client, payload), 404, "not_found")
+
+
+def test_upsert_rejects_other_arena_subcategory(client, grade_context):
+    other = _make_other_arena()
+    login(client)
+    payload = _get_upsert_payload(grade_context, subcategory_id=other["subcategory_id"])
+    _assert_error(_save_grades(client, payload), 400, "invalid_subcategory_id")
+
+
+@pytest.mark.parametrize("path", ["grades", f"grades/{DEFAULT_DAY}"])
+def test_reads_reject_other_arena_student(client, grade_context, path):
+    other = _make_other_arena()
+    login(client)
+    _assert_error(client.get(f"/api/students/{other['student_id']}/{path}"), 404, "not_found")
+
+
+def test_same_username_logs_into_its_own_arena(client, grade_context):
+    _make_other_arena()
+    login(client, arena=OTHER_ARENA)
+    assert client.get("/api/me").get_json()["user"]["arena_name"] == OTHER_ARENA
+    _assert_error(client.get(f"/api/students/{grade_context['student1_id']}/grades"), 404, "not_found")

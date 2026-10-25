@@ -23,12 +23,13 @@ each new file builds on what came before, read them in order for the most cohere
         - `i18n.js`: vue-i18n setup, the `t()` function all components use for en and pt-br translations
     - **api**: one thin file per backend resource, all built on top of `request.js`
         - `api/request.js`: all api calls use it, normalizes failure responses. 401 forgets user and goes to login page
+        - `api/routes/arenas.js`: get every arena, for the login picker
         - `api/routes/auth.js`: login, logout, locale change, admin password, and session check
         - `api/routes/students.js`: get, create, and delete students
         - `api/routes/teachers.js`: get, create, and delete teachers
         - `api/routes/categories.js`: get, create, and delete categories and subcategories
         - `api/routes/grades.js`: save grades, get grades by date, and get latest grades
-        - `api/routes/seed.js`: wipe the database except admin and fill it with test data
+        - `api/routes/seed.js`: wipe the admin's arena except admin and fill it with test data
     - **composables**: reusable reactive logic, each file owns one self-contained concern
         - `composables/generic/useLoading.js`: tracks in-flight async state, prevents double-submission
         - `composables/generic/useToast.js`: app-wide notification: one shared message auto-dismissed after 4 seconds
@@ -63,7 +64,7 @@ each new file builds on what came before, read them in order for the most cohere
     - **views**
         - `styles/views/login.css`: viewport-centered login card
         - `styles/views/teacher-grades.css`: student selector row
-        - `styles/views/categories.css`: category header and subcategory form alignment
+        - `styles/views/categories.css`: subcategory form alignment inside the category cards
     - **overrides**
         - `styles/overrides/mobile.css`: responsive adjustments for narrow screens
 - **vue**: components split by kind, shared components are read before the views that depend on them

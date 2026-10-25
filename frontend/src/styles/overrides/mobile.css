@@ -1,8 +1,7 @@
-/* on narrow screens the top bar 3 columns (username | links | locale+logout) don't fit in one row
-   800px gives enough room for a 25-char username + 3 nav tabs + locale selector + logout button
-   before any of them start touching each other's margins
-   800px can't be a css variable: the browser resolves @media conditions before the cascade, so var() is ignored */
-@media (max-width: 800px) {
+/* on narrow screens the top bar 3 columns (arena+locale | links | username+logout) don't fit in one row
+   1200px gives enough room for arena + locale + 3 tabs + username + logout button before any of them start touching each other's margins
+   1200px can't be a css variable: the browser resolves @media conditions before the cascade, so var() is ignored */
+@media (max-width: 1200px) {
     body {
         padding: 0 var(--space-2) var(--space-4);
         /* min-width = --width-card (.list-card in structure.css) + 2 * --space-2 (body padding above) = 376px
@@ -10,37 +9,53 @@
         min-width: calc(var(--width-card) + 2 * var(--space-2));
     }
 
+    /* overrides the desktop 3 column grid with 2 columns, rows: arena, username, locale+logout, nav links */
     .top-bar {
-        /* overrides the desktop grid */
-        display: flex;
-        flex-wrap: wrap;
-        /* gap only between rows, no column gap needed */
+        grid-template-columns: 1fr 1fr;
         row-gap: var(--space-2);
         padding: var(--space-2);
         /* negative h-margin must match body padding so the top bar still bleeds edge-to-edge */
         margin: 0 calc(-1 * var(--space-2)) var(--space-3);
     }
 
-    /* row 1: username centered, sized to content so the border never clips the text */
-    .top-bar-left {
-        width: max-content;
-        /* centers a block element by giving equal auto margins on both sides */
-        margin: 0 auto;
-        /* order sets the visual position in flex without changing dom order */
-        order: 1;
-    }
-
-    /* row 2: locale far left, logout far right */
+    /* the side groups dissolve: their children become grid items of the bar, each placed in its row below */
+    .top-bar-left,
     .top-bar-right {
-        width: 100%;
-        justify-content: space-between;
-        order: 2;
+        display: contents;
     }
 
-    /* row 3: nav links centered */
+    /* rows 1 and 2: arena then username, centered across both columns, sized to content */
+    .top-bar-arena,
+    .top-bar-user {
+        grid-column: 1 / -1;
+        justify-self: center;
+    }
+
+    .top-bar-arena {
+        grid-row: 1;
+    }
+
+    .top-bar-user {
+        grid-row: 2;
+    }
+
+    /* row 3: locale far left, logout far right */
+    .top-bar-locale {
+        grid-row: 3;
+        grid-column: 1;
+        justify-self: start;
+    }
+
+    .top-bar-logout {
+        grid-row: 3;
+        grid-column: 2;
+        justify-self: end;
+    }
+
+    /* row 4: nav links centered */
     .top-bar-center {
-        width: 100%;
-        order: 3;
+        grid-row: 4;
+        grid-column: 1 / -1;
     }
 
     .top-bar-links {
@@ -53,11 +68,6 @@
     .single-line-form {
         flex-direction: column;
         width: max-content;
-    }
-
-    /* > targets only direct children, not deeper descendants */
-    .single-line-form > * {
-        width: auto;
     }
 
     /* cap full-width elements so they center like the login and list cards (both 360px fixed)

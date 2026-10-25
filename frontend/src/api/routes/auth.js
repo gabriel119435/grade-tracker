@@ -1,7 +1,7 @@
 import {request} from '../request.js'
 
-export async function login(username, password) {
-    return request('/api/login', {method: 'POST', body: JSON.stringify({username, password})})
+export async function login(arenaId, username, password) {
+    return request('/api/login', {method: 'POST', body: JSON.stringify({arena_id: arenaId, username, password})})
 }
 
 export async function logout() {

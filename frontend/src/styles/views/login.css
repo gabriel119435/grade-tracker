@@ -29,11 +29,11 @@
     gap: var(--space-2);
 }
 
-/* inputs spanning the full card width */
-.login-card input {
-    width: 100%;
-    /* inputs are inline-block by default, block makes width: 100% stretch to fill */
+/* inputs and arena picker spanning the full card width, block makes width: 100% stretch to fill */
+.login-card input,
+.login-card .app-dropdown {
     display: block;
+    width: 100%;
 }
 
 /* login button spanning the full card width */

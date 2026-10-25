@@ -1,13 +1,13 @@
 from flask import abort, jsonify
+from flask_login import current_user
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
-from app.constants import USERNAME_MAX_LENGTH
 from app.db import get_session
 from app.models import Grade, User
 from app.routes.helpers.payload import get_str
-from app.validation import password_error, validate_word_size
+from app.validation import password_error, username_error
 
 
 def list_users(role, grade_fk):
@@ -16,7 +16,7 @@ def list_users(role, grade_fk):
         rows = session.execute(
             select(User, func.count(Grade.id))
             .outerjoin(Grade, grade_fk == User.id)
-            .where(User.role == role)
+            .where(User.role == role, User.arena_id == current_user.arena_id)
             .group_by(User.id)
             .order_by(User.id)
         ).all()
@@ -31,16 +31,7 @@ def create_user(role, data):
     if not username or not password:
         abort(400, "username_and_password_required")
 
-    if username != username.strip():
-        abort(400, "username_spaces")
-
-    # no minimum length for usernames: they are not secrets, so short names and initials are valid
-    if len(username) > USERNAME_MAX_LENGTH:
-        abort(400, "username_too_long")
-
-    validate_word_size(username)
-
-    error = password_error(password)
+    error = username_error(username) or password_error(password)
     if error:
         abort(400, error)
 
@@ -48,6 +39,7 @@ def create_user(role, data):
         with get_session(write=True) as session:
             session.add(
                 User(
+                    arena_id=current_user.arena_id,
                     username=username,
                     password_hash=generate_password_hash(password),
                     role=role,
@@ -62,7 +54,8 @@ def delete_user(user_id, role):
     # role is trusted, caller must guard with @require_role before reaching here
     with get_session(write=True) as session:
         user = session.get(User, user_id)
-        if not user or user.role != role:
+        # another arena's user is the same 404 as a missing one, its existence never leaks
+        if not user or user.role != role or user.arena_id != current_user.arena_id:
             abort(404, "not_found")
         session.delete(user)
 

@@ -1,15 +1,22 @@
 <script setup>
-import {ref, useTemplateRef} from 'vue'
+import {computed, onMounted, ref, useTemplateRef} from 'vue'
 import {useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
+import {getArenas} from '../api/routes/arenas.js'
 import {login} from '../api/routes/auth.js'
 import {store} from '../store.js'
+import {useListLoad} from '../composables/generic/useListLoad.js'
 import {useLoading} from '../composables/generic/useLoading.js'
 import {translateError} from '../utils/translateError.js'
 import {PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../constants.js'
+import AppDropdown from '../components/AppDropdown.vue'
+import LoadError from '../components/LoadError.vue'
 
 const router = useRouter()
 const {t, locale} = useI18n()
+const {items: arenas, failed: arenasFailed, load: loadArenas} = useListLoad(getArenas)
+const arenaOptions = computed(() => arenas.value.map((arena) => ({value: arena.id, label: arena.name})))
+const arenaId = ref()
 const username = ref('')
 const password = ref('')
 const passwordInput = useTemplateRef('passwordInput')
@@ -17,10 +24,12 @@ const passwordInput = useTemplateRef('passwordInput')
 const error = ref(null)
 const {loading, withLoading} = useLoading()
 
+onMounted(loadArenas)
+
 async function handleSubmit() {
   await withLoading(async () => {
     error.value = null
-    const data = await login(username.value, password.value)
+    const data = await login(arenaId.value, username.value, password.value)
     if (data.error) {
       error.value = translateError(data.error)
       passwordInput.value.select()
@@ -45,6 +54,17 @@ async function handleSubmit() {
         {{ t('login.session_check_failed') }}
       </p>
       <form @submit.prevent="handleSubmit">
+        <LoadError
+          v-if="arenasFailed"
+          :message="t('login.arenas_failed')"
+          @retry="loadArenas"
+        />
+        <AppDropdown
+          v-else
+          v-model="arenaId"
+          :options="arenaOptions"
+          :placeholder="t('login.arena')"
+        />
         <input
           v-model="username"
           type="text"
@@ -63,7 +83,7 @@ async function handleSubmit() {
         <button
           class="btn-primary"
           type="submit"
-          :disabled="loading"
+          :disabled="loading || !arenaId"
         >
           {{ t('login.submit') }}
         </button>

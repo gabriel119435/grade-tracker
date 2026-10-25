@@ -6,9 +6,11 @@ services:
       target: b-runtime
     environment:
       - SECRET_KEY=${SECRET_KEY:-} # :- defaults to empty when unset, without compose warning
-      - ADMIN_PASS=${ADMIN_PASS:-}
-      - SEED_PASS=${SEED_PASS:-}
       - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-}
+      - DEFAULT_ARENA_NAME=${DEFAULT_ARENA_NAME:-}
+      - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME:-}
+      - DEFAULT_ADMIN_PASS=${DEFAULT_ADMIN_PASS:-}
+      - DEFAULT_SEED_PASS=${DEFAULT_SEED_PASS:-}
       - FLASK_HOST=0.0.0.0
       - FLASK_DEBUG=0 # no reloader process, no debugger stack trace pages
       - DATABASE_URL=sqlite:////data/app.db # points db to the named volume directory so data persists across container restarts

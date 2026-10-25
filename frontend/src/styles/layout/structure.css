@@ -54,6 +54,25 @@
     flex-direction: column;
 }
 
+/* grade form and grade history cards */
+.form-card,
+.history-card {
+    background: var(--color-bg-2);
+    border-color: var(--color-b-0);
+    padding: var(--space-3);
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* category cards in the grade history and category blocks in the grade form */
+.category-card,
+.category-block {
+    background: var(--color-bg-3);
+    border-color: var(--color-b-1);
+    padding: var(--space-3);
+    align-items: center;
+}
+
 /* list card: teacher list, student list, category management cards */
 .list-card {
     background: var(--color-bg-2);

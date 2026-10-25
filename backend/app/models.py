@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from flask_login import UserMixin
-from sqlalchemy import Enum, ForeignKey, Index, UniqueConstraint, delete
+from sqlalchemy import Enum, ForeignKey, Index, UniqueConstraint, delete, select, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.constants import DEFAULT_LOCALE, LOCALES
@@ -17,6 +17,7 @@ class AuthUser(UserMixin):
     role: str
     password_hash: str
     locale: str
+    arena_id: int
 
     def get_id(self):
         # stored in the session cookie as "<id> <last 10 hash chars>". load_user rejects it once the password changes.
@@ -25,15 +26,28 @@ class AuthUser(UserMixin):
     @classmethod
     def from_user(cls, user):
         return cls(
-            id=user.id, username=user.username, role=user.role, password_hash=user.password_hash, locale=user.locale
+            id=user.id,
+            username=user.username,
+            role=user.role,
+            password_hash=user.password_hash,
+            locale=user.locale,
+            arena_id=user.arena_id,
         )
+
+
+class Arena(Base):
+    __tablename__ = "arenas"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
 
 
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(unique=True)
+    arena_id: Mapped[int] = mapped_column(ForeignKey("arenas.id", ondelete="CASCADE"))
+    username: Mapped[str]
     password_hash: Mapped[str]
     role: Mapped[str] = mapped_column(Enum("admin", "teacher", "student"))
     locale: Mapped[str] = mapped_column(
@@ -43,12 +57,27 @@ class User(Base):
         server_default=DEFAULT_LOCALE,
     )
 
+    __table_args__ = (
+        UniqueConstraint("arena_id", "username"),
+        # one admin per arena, enforced by the db: unique arena_id among admin rows only
+        Index(
+            "ux_users_one_admin_per_arena",
+            "arena_id",
+            unique=True,
+            sqlite_where=text("role = 'admin'"),
+        ),
+    )
+
 
 class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(unique=True)
+    arena_id: Mapped[int] = mapped_column(ForeignKey("arenas.id", ondelete="CASCADE"))
+    name: Mapped[str]
+
+    # same category name allowed in different arenas, not in the same one
+    __table_args__ = (UniqueConstraint("arena_id", "name"),)
 
     # passive_deletes: one DELETE on the parent, sqlite cascades the children, o(1) in python.
     # without it sqlalchemy loads every child first, o(n).
@@ -96,9 +125,11 @@ class Grade(Base):
     subcategory: Mapped[Subcategory] = relationship()
 
 
-def wipe(session):
-    # deletes all grades, subcategories, categories and non admin users, children first.
-    session.execute(delete(Grade))
-    session.execute(delete(Subcategory))
-    session.execute(delete(Category))
-    session.execute(delete(User).where(User.username != "admin"))
+def wipe(session, arena_id):
+    # deletes arena's grades, subcategories, categories and non admin users.
+    user_ids = select(User.id).where(User.arena_id == arena_id)
+    category_ids = select(Category.id).where(Category.arena_id == arena_id)
+    session.execute(delete(Grade).where(Grade.student_id.in_(user_ids)))
+    session.execute(delete(Subcategory).where(Subcategory.category_id.in_(category_ids)))
+    session.execute(delete(Category).where(Category.arena_id == arena_id))
+    session.execute(delete(User).where(User.arena_id == arena_id, User.role != "admin"))
