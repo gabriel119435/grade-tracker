@@ -8,7 +8,7 @@ import {store} from '../store.js'
 import {useListLoad} from '../composables/generic/useListLoad.js'
 import {useLoading} from '../composables/generic/useLoading.js'
 import {translateError} from '../utils/translateError.js'
-import {PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../constants.js'
+import {HOME_URL, PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../constants.js'
 import AppDropdown from '../components/AppDropdown.vue'
 import LoadError from '../components/LoadError.vue'
 
@@ -37,7 +37,7 @@ async function handleSubmit() {
       store.user = data.user
       store.sessionCheckFailed = false
       locale.value = data.user.locale
-      await router.push(`/${data.user.role}`)
+      await router.push(HOME_URL[data.user.role])
     }
   })
 }

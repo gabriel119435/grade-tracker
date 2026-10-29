@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import {getMe} from '../api/routes/auth.js'
 import {store} from '../store.js'
 import {i18n} from '../i18n.js'
+import {HOME_URL} from '../constants.js'
 import BaseLayout from '../layouts/BaseLayout.vue'
 import TabLayout from '../layouts/TabLayout.vue'
 import LoginView from '../views/LoginView.vue'
@@ -10,8 +11,6 @@ import CategoriesView from '../views/teacher/CategoriesView.vue'
 import StudentsView from '../views/teacher/StudentsView.vue'
 import TeacherGradesView from '../views/teacher/GradesView.vue'
 import StudentGradesView from '../views/student/GradesView.vue'
-
-const HOME_URL = {admin: '/admin', teacher: '/teacher', student: '/student'}
 
 const routes = [
     {

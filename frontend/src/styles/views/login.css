@@ -37,7 +37,7 @@
 }
 
 /* login button spanning the full card width */
-.login-card button {
+.login-card form > button {
     width: 100%;
     /* extra space above the button, on top of the form's gap */
     margin-top: var(--space-1);

@@ -8,6 +8,7 @@ from app.db import get_session
 from app.models import Category, Subcategory
 from app.routes.helpers.decorators import require_role
 from app.routes.helpers.payload import get_body, get_int, get_str
+from app.routes.helpers.scope import get_in_arena
 from app.validation import name_error
 
 categories_bp = Blueprint("categories", __name__)
@@ -62,10 +63,7 @@ def create_category():
 @require_role("teacher")
 def delete_category(category_id):
     with get_session(write=True) as session:
-        cat = session.get(Category, category_id)
-        if not cat or cat.arena_id != current_user.arena_id:
-            abort(404, "not_found")
-        session.delete(cat)
+        session.delete(get_in_arena(session, Category, category_id))
 
     return jsonify({"message": "deleted"})
 
@@ -85,9 +83,7 @@ def create_subcategory():
 
     try:
         with get_session(write=True) as session:
-            category = session.get(Category, category_id)
-            if not category or category.arena_id != current_user.arena_id:
-                abort(404, "not_found")
+            get_in_arena(session, Category, category_id)
             session.add(Subcategory(name=name, category_id=category_id))
         return jsonify({"message": "created"}), 201
     except IntegrityError:
@@ -98,9 +94,6 @@ def create_subcategory():
 @require_role("teacher")
 def delete_subcategory(subcategory_id):
     with get_session(write=True) as session:
-        subcategory = session.get(Subcategory, subcategory_id)
-        if not subcategory or subcategory.category.arena_id != current_user.arena_id:
-            abort(404, "not_found")
-        session.delete(subcategory)
+        session.delete(get_in_arena(session, Subcategory, subcategory_id))
 
     return jsonify({"message": "deleted"})

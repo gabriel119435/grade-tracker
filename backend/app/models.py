@@ -99,6 +99,11 @@ class Subcategory(Base):
     # python-only access to the category row through `category_id`, no db column
     category: Mapped[Category] = relationship(back_populates="subcategories")
 
+    # python-only arena_id, not a column, so routes/helpers/scope.py can check subcategories
+    @property
+    def arena_id(self):
+        return self.category.arena_id
+
 
 class Grade(Base):
     __tablename__ = "grades"

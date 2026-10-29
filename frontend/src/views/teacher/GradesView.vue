@@ -17,12 +17,19 @@ import LoadError from '../../components/LoadError.vue'
 
 const {t} = useI18n()
 // students: [{id: 1, username: 'alice', grade_count: 12}]
-const {items: students, failed: studentsFailed, load: loadStudents} = useListLoad(getStudents)
+const {items: students, failed: studentsFailed, ready: studentsReady, load: loadStudents} = useListLoad(getStudents)
 // categories: [{id: 1, name: 'serve', subcategories: [{id: 3, name: 'slice'}]}]
-const {items: categories, failed: categoriesFailed, load: loadCategories} = useListLoad(getCategories)
+const {
+  items: categories,
+  failed: categoriesFailed,
+  ready: categoriesReady,
+  load: loadCategories,
+} = useListLoad(getCategories)
 
 // true when either list failed, the page shows only an inline message and a retry
 const listsFailed = computed(() => studentsFailed.value || categoriesFailed.value)
+// true once both lists loaded: the selector and the form need both
+const listsReady = computed(() => studentsReady.value && categoriesReady.value)
 
 // student id (number) once picked
 const selectedStudentId = ref(null)
@@ -96,7 +103,7 @@ watch(showForm, (open) => {
       :message="t('grades.lists_failed')"
       @retry="loadLists"
     />
-    <template v-else>
+    <template v-else-if="listsReady">
       <div class="selector-row">
         <AppDropdown
           v-model="selectedStudentId"

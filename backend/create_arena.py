@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app.arena import create_arena
+from app.migrations import apply_migrations
 
 
 def main():
@@ -19,6 +20,9 @@ def main():
     parser.add_argument("admin")
     parser.add_argument("password")
     args = parser.parse_args()
+
+    # a run before the first app start finds no tables
+    apply_migrations()
 
     try:
         created = create_arena(args.arena, args.admin, args.password)

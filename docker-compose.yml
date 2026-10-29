@@ -13,7 +13,7 @@ services:
       - DEFAULT_SEED_PASS=${DEFAULT_SEED_PASS:-}
       - FLASK_HOST=0.0.0.0
       - FLASK_DEBUG=0 # no reloader process, no debugger stack trace pages
-      - DATABASE_URL=sqlite:////data/app.db # points db to the named volume directory so data persists across container restarts
+      - DATABASE_URL=sqlite:////data/app.db # db in the named volume, persists across container restarts
     volumes:
       - grade-tracker-db:/data
     mem_limit: 256m # oom-killed before os runs out; no swap

@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 from app.db import get_session
 from app.models import Grade, User
 from app.routes.helpers.payload import get_str
+from app.routes.helpers.scope import get_in_arena
 from app.validation import password_error, username_error
 
 
@@ -53,9 +54,8 @@ def create_user(role, data):
 def delete_user(user_id, role):
     # role is trusted, caller must guard with @require_role before reaching here
     with get_session(write=True) as session:
-        user = session.get(User, user_id)
-        # another arena's user is the same 404 as a missing one, its existence never leaks
-        if not user or user.role != role or user.arena_id != current_user.arena_id:
+        user = get_in_arena(session, User, user_id)
+        if user.role != role:
             abort(404, "not_found")
         session.delete(user)
 

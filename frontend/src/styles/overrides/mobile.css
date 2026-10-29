@@ -1,5 +1,5 @@
 /* on narrow screens the top bar 3 columns (arena+locale | links | username+logout) don't fit in one row
-   1200px gives enough room for arena + locale + 3 tabs + username + logout button before any of them start touching each other's margins
+   1200px gives enough room for arena + locale + 3 tabs + username + logout button
    1200px can't be a css variable: the browser resolves @media conditions before the cascade, so var() is ignored */
 @media (max-width: 1200px) {
     body {

@@ -11,6 +11,7 @@ from app.db import get_session
 from app.models import Category, Grade, Subcategory, User
 from app.routes.helpers.decorators import require_role
 from app.routes.helpers.payload import get_body, get_int, get_list, get_str, is_number
+from app.routes.helpers.scope import get_in_arena
 
 MAX_GRADE_LIMIT = 100
 
@@ -44,7 +45,7 @@ def save_grades():
         if delete_grade_ids:
             _delete_grades(session, student_id, delete_grade_ids)
 
-    return jsonify({"message": "saved"}), 201
+    return jsonify({"message": "saved"})
 
 
 def _validate_date(grade_date):
@@ -59,8 +60,8 @@ def _validate_date(grade_date):
 
 # missing id, a non student id or another arena's student: same error for every grade route
 def _check_student(session, student_id):
-    student = session.get(User, student_id)
-    if not student or student.role != "student" or student.arena_id != current_user.arena_id:
+    student = get_in_arena(session, User, student_id)
+    if student.role != "student":
         abort(404, "not_found")
 
 

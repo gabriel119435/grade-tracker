@@ -8,8 +8,11 @@
     - locale switch saves into the new user's account; same-role teacher saves grades under the new `teacher_id`
 - cache `load_user`: it runs a full `SELECT` on every authenticated request; worth it if traffic grows.
 - backend files with no tests:
-    - `validation.py`, `settings.py`, `db.py`, `arena.py`, `app/__init__.py`, `decorators.py`, `payload.py`, `users.py`
+    - `run.py`, `constants.py`, `validation.py`, `settings.py`, `db.py`, `models.py`
+    - `migrations.py`, `arena.py`, `seed_data.py`, `app/__init__.py`
+    - `decorators.py`, `payload.py`, `scope.py`, `users.py`
     - `arenas.py`, `auth.py`, `teachers.py`, `students.py`, `categories.py`, `seed.py`, `create_arena.py`
 - frontend files with no tests:
-    - `request.js`, `translateError.js`, `clickOutside.js`, `i18n.js`, `en.js`, `pt-br.js`, `constants.js`
-    - `composables/`, `components/`, `layouts/` and `views/`
+    - `main.js`, `constants.js`, `en.js`, `pt-br.js`, `i18n.js`, `translateError.js`
+    - `store.js`, `request.js`, `App.vue`, `clickOutside.js`
+    - `composables/`, `api/routes/`, `components/`, `layouts/` and `views/`

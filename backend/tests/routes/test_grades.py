@@ -58,7 +58,7 @@ def _assert_error(res, status, error):
 
 
 def _assert_saved(res):
-    assert res.status_code == 201
+    assert res.status_code == 200
     assert res.get_json() == {"message": "saved"}
 
 

@@ -21,3 +21,6 @@ export const LIMIT_PARAMS = {
 
 // grade history sizes offered by the limit buttons, default first
 export const GRADE_HISTORY_LIMITS = [5, 10, 30]
+
+// landing page of each role, used after login and by the router guard
+export const HOME_URL = {admin: '/admin', teacher: '/teacher', student: '/student'}

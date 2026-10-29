@@ -13,7 +13,7 @@ class Base(DeclarativeBase):
     pass
 
 
-DB_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
+DB_URL = os.environ.get("DATABASE_URL") or f"sqlite:///{DB_PATH}"
 
 # journal_mode is sqlite's default delete: reads see the last commit during a write, a commit waits for open reads
 # a wait longer than 5s (pysqlite default timeout) fails with "database is locked"
