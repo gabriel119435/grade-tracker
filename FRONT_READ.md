@@ -45,7 +45,7 @@ each new file builds on what came before, read them in order for the most cohere
     - `AppToast.vue`: renders the toast message with a fade.
     - `LoadError.vue`: failed load message and retry button.
     - `ConfirmButton.vue`: two-click danger button, emits `confirm` on the 2nd click.
-    - `AppDropdown.vue`: custom picker, closes on outside click, esc or tab away.
+    - `AppSelect.vue`: custom picker, closes on outside click, esc or tab away.
     - `AppTopBar.vue`: arena, locale picker, tab links slot, username, logout.
     - `UserList.vue`: create form with live checks, list with delete, for teachers or students.
     - `DateInput.vue`: date in the locale format, live validation.
@@ -74,7 +74,7 @@ each new file builds on what came before, read them in order for the most cohere
     - `styles/generic/reset.css`: removes browser defaults, base font and colors.
     - `styles/elements/`: bare `button` and `input`, primary, danger, group and ghost buttons, field error.
     - `styles/layout/structure.css`: stacks, rows, cards, single line forms.
-    - `styles/components/`: top bar, toast, load error, dropdown, user list, grade input, grade form, charts.
+    - `styles/components/`: top bar, toast, load error, select, user list, grade input, grade form, charts.
     - `styles/views/`: login card, teacher grades selector, category cards.
     - `styles/overrides/mobile.css`: top bar rows, stacked forms, capped cards.
 - **tests**: next to the file they test

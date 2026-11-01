@@ -9,7 +9,7 @@ import {useListLoad} from '../composables/generic/useListLoad.js'
 import {useLoading} from '../composables/generic/useLoading.js'
 import {translateError} from '../utils/translateError.js'
 import {HOME_URL, PASSWORD_MAX_LENGTH, USERNAME_MAX_LENGTH} from '../constants.js'
-import AppDropdown from '../components/AppDropdown.vue'
+import AppSelect from '../components/AppSelect.vue'
 import LoadError from '../components/LoadError.vue'
 
 const router = useRouter()
@@ -59,7 +59,7 @@ async function handleSubmit() {
           :message="t('login.arenas_failed')"
           @retry="loadArenas"
         />
-        <AppDropdown
+        <AppSelect
           v-else
           v-model="arenaId"
           :options="arenaOptions"

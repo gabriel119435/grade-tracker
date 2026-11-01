@@ -1,5 +1,5 @@
-// intended behavior: closes floating ui (dropdown list) when the user clicks anywhere else on the page
-// the handler closes the ui (AppDropdown.vue sets open to false), called by the listener on a click outside
+// intended behavior: closes floating ui (select list) when the user clicks anywhere else on the page
+// the handler closes the ui (AppSelect.vue sets open to false), called by the listener on a click outside
 
 // map has structure tag-element:handler-function
 // the handler is the v-click-outside value in the template

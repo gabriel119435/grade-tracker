@@ -12,7 +12,7 @@ import {useListLoad} from '../../composables/generic/useListLoad.js'
 import {GRADE_HISTORY_LIMITS} from '../../constants.js'
 import GradeCharts from '../../components/GradeCharts.vue'
 import GradeForm from '../../components/GradeForm.vue'
-import AppDropdown from '../../components/AppDropdown.vue'
+import AppSelect from '../../components/AppSelect.vue'
 import LoadError from '../../components/LoadError.vue'
 
 const {t} = useI18n()
@@ -53,7 +53,7 @@ const {
 const {chartGrades, chartGradesReady, chartGradesFailed, loadChartGrades} = useChartGrades()
 const limit = ref(GRADE_HISTORY_LIMITS[0])
 
-// AppDropdown options: [{value: 1, label: 'alice'}]
+// AppSelect options: [{value: 1, label: 'alice'}]
 const studentOptions = computed(() => students.value.map((s) => ({value: s.id, label: s.username})))
 
 // both lists are needed: no students means nothing to pick, no categories means a form without cells
@@ -105,7 +105,7 @@ watch(showForm, (open) => {
     />
     <template v-else-if="listsReady">
       <div class="selector-row">
-        <AppDropdown
+        <AppSelect
           v-model="selectedStudentId"
           :options="studentOptions"
           :placeholder="t('grades.select_student')"

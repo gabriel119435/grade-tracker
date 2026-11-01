@@ -1,5 +1,5 @@
-/* custom themed dropdown, replaces native <select> */
-.app-dropdown {
+/* custom themed select, replaces native <select> */
+.app-select {
     /* position: absolute descendants measure their position from this element */
     position: relative;
     /* shrinks to content width like text, but still accepts a set width */
@@ -12,7 +12,7 @@
 
 /* top bar locale picker only
    compact variant: sized to the widest option so it never resizes on selection */
-.app-dropdown.app-select-compact {
+.app-select.app-select-compact {
     width: auto;
     /* never narrower than the widest option text */
     min-width: max-content;
@@ -60,8 +60,8 @@
 }
 
 /* floating list of options, appears below the trigger when open */
-.app-select-dropdown {
-    /* takes no space in layout, floats over content, anchored to .app-dropdown (position: relative) */
+.app-select-list {
+    /* takes no space in layout, floats over content, anchored to .app-select (position: relative) */
     position: absolute;
     /* 100% = full height of the trigger, + space-1 = gap below it */
     top: calc(100% + var(--space-1));

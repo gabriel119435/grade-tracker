@@ -8,7 +8,7 @@ import {useToast} from '../composables/generic/useToast.js'
 import {useAction} from '../composables/generic/useAction.js'
 import {translateError} from '../utils/translateError.js'
 import {LOCALES} from '../constants.js'
-import AppDropdown from './AppDropdown.vue'
+import AppSelect from './AppSelect.vue'
 
 const router = useRouter()
 const {t, locale} = useI18n()
@@ -45,7 +45,7 @@ async function handleLogout() {
     <div class="top-bar-left">
       <span class="top-bar-pill top-bar-arena">{{ store.user?.arena_name }}</span>
       <!-- v-model split in two: a change must go through handleLocaleChange, which saves it and can revert it -->
-      <AppDropdown
+      <AppSelect
         class="app-select-compact top-bar-locale"
         :model-value="locale"
         :options="LOCALES"

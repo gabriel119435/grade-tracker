@@ -587,8 +587,8 @@ grade-tracker examples:
     - sends the category list down to child `GradeForm.vue`.
 - event in `GradesView.vue`: `<GradeForm @submit="handleSubmit"/>`.
     - receives `submit` from child `GradeForm.vue`, no data comes with it, then calls `handleSubmit`.
-- v-model in `GradesView.vue`: `<AppDropdown v-model="selectedStudentId"/>`.
-    - down: child `AppDropdown.vue` shows the selected student.
+- v-model in `GradesView.vue`: `<AppSelect v-model="selectedStudentId"/>`.
+    - down: child `AppSelect.vue` shows the selected student.
     - up: picking a student sends its id up, `GradesView.vue` stores it in `selectedStudentId`.
     - a `watch` on `selectedStudentId` then loads that student's grades.
 - slot in `TabLayout.vue`: `<AppTopBar>` with the teacher's tab links between its tags.
@@ -668,7 +668,7 @@ export function useCounter() {
 - `mounted(el) { el.focus() }` is shorthand for `mounted: function (el) { el.focus() }`.
 - `function` is js's keyword for defining a function, like python's `def`.
 - register it in `main.js` with `.directive('autofocus', autofocus)`, then use `<input v-autofocus/>`.
-- grade-tracker's `v-click-outside` closes a dropdown when you click anywhere else.
+- grade-tracker's `v-click-outside` closes a select's list when you click anywhere else.
 
 ## translations
 
@@ -708,7 +708,7 @@ export function useCounter() {
     - generic: removes the browser's default styles from every element (`*`), like `* {margin: 0}`.
     - elements: bare tags, for every page, like `button` and `input`.
     - layout: page structure, like stacks, rows and cards.
-    - components: one ui piece each, like dropdown or toast.
+    - components: one ui piece each, like select or toast.
     - views: one specific page, like login or grades.
     - overrides: exceptions that must win, like mobile adjustments.
 - later layers come later and are more specific, so they win.

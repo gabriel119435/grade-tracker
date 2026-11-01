@@ -32,7 +32,7 @@ function select(value) {
   open.value = false
 }
 
-// focus moved to another element outside the dropdown (tab away): close the list
+// focus moved to another element outside the select (tab away): close the list
 // null target is a click, v-click-outside handles those
 function onFocusOut(e) {
   if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) open.value = false
@@ -42,7 +42,7 @@ function onFocusOut(e) {
 <template>
   <div
     v-click-outside="() => (open = false)"
-    class="app-dropdown"
+    class="app-select"
     @keydown.esc="open = false"
     @focusout="onFocusOut"
   >
@@ -60,7 +60,7 @@ function onFocusOut(e) {
     </button>
     <div
       v-if="open"
-      class="app-select-dropdown"
+      class="app-select-list"
     >
       <button
         v-for="opt in options"

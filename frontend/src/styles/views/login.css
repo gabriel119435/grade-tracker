@@ -31,7 +31,7 @@
 
 /* inputs and arena picker spanning the full card width, block makes width: 100% stretch to fill */
 .login-card input,
-.login-card .app-dropdown {
+.login-card .app-select {
     display: block;
     width: 100%;
 }

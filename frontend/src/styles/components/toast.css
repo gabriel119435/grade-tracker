@@ -19,7 +19,7 @@
     /* each \n starts a new line (teacher GradesView joins saved and deleted lines), long lines still wrap */
     white-space: pre-line;
 
-    /* above the dropdown list and all other content */
+    /* above the select list and all other content */
     z-index: var(--z-index-1);
 }
 
