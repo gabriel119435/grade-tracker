@@ -74,6 +74,7 @@ export default {
         decimal_separator: '.',
     },
     backend_errors: {
+        // auth and account
         invalid_credentials: 'invalid username or password',
         wrong_current_password: 'current password is incorrect',
         password_too_short: 'password must be at least {password_min} chars',
@@ -81,17 +82,20 @@ export default {
         invalid_locale: 'invalid locale',
         unauthorized: 'unauthorized',
         forbidden: 'forbidden',
+        // users
         username_and_password_required: 'username and password are required',
         username_spaces: 'username cannot have leading or trailing spaces',
         username_too_long: 'username must be {username_max} chars or fewer',
         word_too_long: 'each word can have at most {word_max} chars',
         username_exists: 'username already exists',
         not_found: 'not found',
+        // categories
         name_required: 'name is required',
         name_too_long: 'name must be {name_max} chars or fewer',
         category_exists: 'category already exists',
         name_and_category_required: 'name and category are required',
         subcategory_exists: 'subcategory already exists in this category',
+        // grades
         invalid_date_format: 'invalid date format',
         date_required: 'date is required',
         student_id_required: 'student is required',
@@ -102,6 +106,7 @@ export default {
         duplicate_subcategory_id: 'subcategory sent more than once',
         grades_not_found: 'one or more grades not found',
         grades_wrong_student: 'grades do not belong to this student',
+        // generic, not business related
         network_error: 'network error',
         invalid_response: 'unexpected server response, try again later',
         internal_server_error: 'server error, check logs',

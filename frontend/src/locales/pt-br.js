@@ -74,6 +74,7 @@ export default {
         decimal_separator: ',',
     },
     backend_errors: {
+        // auth and account
         invalid_credentials: 'usuário ou senha inválidos',
         wrong_current_password: 'senha atual incorreta',
         password_too_short: 'senha deve ter pelo menos {password_min} caracteres',
@@ -81,17 +82,20 @@ export default {
         invalid_locale: 'idioma inválido',
         unauthorized: 'não autorizado',
         forbidden: 'acesso negado',
+        // users
         username_and_password_required: 'usuário e senha são obrigatórios',
         username_spaces: 'usuário não pode ter espaços no início ou fim',
         username_too_long: 'usuário deve ter no máximo {username_max} caracteres',
         word_too_long: 'cada palavra pode ter no máximo {word_max} caracteres',
         username_exists: 'usuário já existe',
         not_found: 'não encontrado',
+        // categories
         name_required: 'nome é obrigatório',
         name_too_long: 'nome deve ter no máximo {name_max} caracteres',
         category_exists: 'categoria já existe',
         name_and_category_required: 'nome e categoria são obrigatórios',
         subcategory_exists: 'subcategoria já existe nesta categoria',
+        // grades
         invalid_date_format: 'formato de data inválido',
         date_required: 'data é obrigatória',
         student_id_required: 'aluno é obrigatório',
@@ -102,6 +106,7 @@ export default {
         duplicate_subcategory_id: 'subcategoria enviada mais de uma vez',
         grades_not_found: 'uma ou mais notas não encontradas',
         grades_wrong_student: 'notas não pertencem a este aluno',
+        // generic, not business related
         network_error: 'erro de rede',
         invalid_response: 'resposta inesperada do servidor, tente novamente mais tarde',
         internal_server_error: 'erro no servidor, verifique os logs',

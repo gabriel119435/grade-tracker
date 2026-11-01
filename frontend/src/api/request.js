@@ -1,5 +1,5 @@
 // 401 and 403 reaction, registered by main.js, keeps request.js free of router imports
-let onSessionLost = () => {}
+let onSessionLost = async () => {}
 
 export function setSessionLostHandler(handler) {
     onSessionLost = handler
@@ -9,7 +9,7 @@ export async function request(url, options = {}) {
     let res
 
     try {
-        const headers = options.body ? {'Content-Type': 'application/json', ...options.headers} : options.headers
+        const headers = options.body ? {'content-type': 'application/json', ...options.headers} : options.headers
         res = await fetch(url, {...options, headers})
     } catch (err) {
         console.error('network error:', err)

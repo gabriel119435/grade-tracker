@@ -12,8 +12,7 @@ each new file builds on what came before, read them in order for the most cohere
     - `.prettierignore`: files prettier skips, the build output and npm's lock file.
     - `index.html`: the single html page, vue mounts into its `#app` div.
     - `public/favicon.svg`: the browser tab icon.
-    - `src/main.js`: creates the app, router, i18n, `v-click-outside`, the session lost handler for a 401 or 403.
-- **base**: shared state, text and the backend connection
+- **base**: shared constants, text, state and the click outside directive
     - `src/constants.js`: rules mirroring `backend/app/constants.py`, locales, history limits, role home urls.
     - `src/locales/en.js`, `pt-br.js`: every text the app shows, plus one message per error code, same keys.
     - `src/i18n.js`: vue-i18n setup, en and pt-br, a missing key shows as "{key} not found".
@@ -22,21 +21,9 @@ each new file builds on what came before, read them in order for the most cohere
     - `src/utils/gradeUtils.js`: typed grade cell to a value, localized display, cell edit states.
     - `src/utils/inputValidation.js`: live checks for edge spaces, word size and password length.
     - `src/store.js`: the logged-in user, whether the session check ran or failed.
-    - `src/api/request.js`: the `fetch` wrapper, failures become `{error: code}`, 401 or 403 calls main.js's handler.
-    - `src/router/index.js`: routes, the session check, one role per page, the catch-all redirect.
-    - `src/App.vue`: the current page, title and html lang from the locale.
     - `src/directives/clickOutside.js`: `v-click-outside`, closes floating ui on a click elsewhere.
-- **composables**: reusable logic, generic ones under `src/composables/generic/`
-    - `useToast.js`: the single message, success or error, shown for 4 seconds.
-    - `useConfirm.js`: two-click confirm for delete and seed, one pending button app-wide.
-    - `useLoading.js`: locks buttons while an action runs, restores keyboard focus after.
-    - `useLatestCall.js`: drops an answer that a newer call already replaced.
-    - `useLoad.js`: page data, latest call wins, error toast, failed and ready flags.
-    - `useListLoad.js`: `useLoad` for lists, starts empty.
-    - `useAction.js`: a button action, api call inside the lock, error as toast, success callback.
-    - `grades/useChartGrades.js`: chart data of both grade views.
-    - `grades/useGrades.js`: grade form state, day grades, cell states, save, separator rewrite on locale switch.
-- **api routes**: one file per backend resource, under `src/api/routes/`
+- **api**: the fetch wrapper, then one file per backend resource under `src/api/routes/`
+    - `src/api/request.js`: the `fetch` wrapper, failures become `{error: code}`, 401 or 403 calls main.js's handler.
     - `arenas.js`: every arena, for the login picker.
     - `auth.js`: login, logout, session check, locale, admin password.
     - `teachers.js`: list, create, delete.
@@ -44,12 +31,22 @@ each new file builds on what came before, read them in order for the most cohere
     - `categories.js`: list, create and delete categories and subcategories.
     - `grades.js`: save, one day's grades, history.
     - `seed.js`: wipe and fill the admin's arena.
+- **composables**: reusable logic, generic ones under `src/composables/generic/`
+    - `useToast.js`: the single message, success or error, shown for 4 seconds.
+    - `useConfirm.js`: two-click confirm for delete and seed, one pending button app-wide.
+    - `useLoading.js`: locks buttons while an action runs, restores keyboard focus after.
+    - `useLatestCall.js`: drops an answer that a newer call already replaced.
+    - `useAction.js`: a button action, api call inside the lock, error as toast, success callback.
+    - `useLoad.js`: page data, latest call wins, error toast, failed and ready flags.
+    - `useListLoad.js`: `useLoad` for lists, starts empty.
+    - `grades/useChartGrades.js`: chart data of both grade views.
+    - `grades/useGrades.js`: grade form state, day grades, cell states, save, separator rewrite on locale switch.
 - **components**: under `src/components/`
     - `AppToast.vue`: renders the toast message with a fade.
-    - `AppTopBar.vue`: arena, locale picker, tab links slot, username, logout.
-    - `AppDropdown.vue`: custom picker, closes on outside click, esc or tab away.
-    - `ConfirmButton.vue`: two-click danger button, emits `confirm` on the 2nd click.
     - `LoadError.vue`: failed load message and retry button.
+    - `ConfirmButton.vue`: two-click danger button, emits `confirm` on the 2nd click.
+    - `AppDropdown.vue`: custom picker, closes on outside click, esc or tab away.
+    - `AppTopBar.vue`: arena, locale picker, tab links slot, username, logout.
     - `UserList.vue`: create form with live checks, list with delete, for teachers or students.
     - `DateInput.vue`: date in the locale format, live validation.
     - `GradeInput.vue`: one grade cell, colored by its edit state.
@@ -62,11 +59,15 @@ each new file builds on what came before, read them in order for the most cohere
     - `TabLayout.vue`: same, plus the teacher's tab links.
 - **views**: one per page, under `src/views/`
     - `LoginView.vue`: arena picker and login form.
+    - `teacher/StudentsView.vue`: create and delete students.
     - `admin/AdminView.vue`: teachers, admin password, seed.
     - `teacher/CategoriesView.vue`: create and delete categories and subcategories.
-    - `teacher/StudentsView.vue`: create and delete students.
-    - `teacher/GradesView.vue`: student picker, grade form, charts.
     - `student/GradesView.vue`: own grade charts.
+    - `teacher/GradesView.vue`: student picker, grade form, charts.
+- **app**: the wiring, read last since it uses everything above
+    - `src/router/index.js`: routes, the session check, one role per page, the catch-all redirect.
+    - `src/App.vue`: the current page, title and html lang from the locale.
+    - `src/main.js`: creates the app, router, i18n, `v-click-outside`, the session lost handler for a 401 or 403.
 - **styles**: global css, itcss layers from generic to specific
     - `src/style.css`: imports every layer in order, each one overrides the ones above.
     - `styles/settings/variables.css`: palette, colors, spacing, fonts and other tokens.
@@ -77,7 +78,7 @@ each new file builds on what came before, read them in order for the most cohere
     - `styles/views/`: login card, teacher grades selector, category cards.
     - `styles/overrides/mobile.css`: top bar rows, stacked forms, capped cards.
 - **tests**: next to the file they test
-    - `src/router/index.test.js`: session check and page access per role.
-    - `src/utils/gradeUtils.test.js`: grade parsing, display and edit states.
     - `src/utils/dateUtils.test.js`: date display, validation and today's local date.
+    - `src/utils/gradeUtils.test.js`: grade parsing, display and edit states.
     - `src/utils/inputValidation.test.js`: edge spaces, word size and password length checks.
+    - `src/router/index.test.js`: session check and page access per role.
