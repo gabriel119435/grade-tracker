@@ -92,7 +92,7 @@
 }
 
 /* hovered and currently selected option share the same highlight */
-.app-select-option:hover,
+.app-select-option:hover:not(:disabled),
 .app-select-option.active {
     background: var(--color-bg-2);
 }

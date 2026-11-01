@@ -1,5 +1,6 @@
 <script setup>
 import {computed, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 // custom select: shows a list of options, the picked option's value goes to the parent's v-model
 // every option has a value (stored in model, ex: 3) and a label (shown on screen, ex: 'alice')
@@ -13,6 +14,8 @@ const props = defineProps({
 })
 // receives the parent's v-model value, assigning model.value sends it back to the parent: 'en' or 3
 const model = defineModel({type: [String, Number]})
+
+const {t} = useI18n()
 
 // whether the option list is visible
 const open = ref(false)
@@ -32,8 +35,8 @@ function select(value) {
   open.value = false
 }
 
-// focus moved to another element outside the select (tab away): close the list
-// null target is a click, v-click-outside handles those
+// tab away: focus moved to an element outside the select, close the list
+// null target is a mouse click, left to v-click-outside so a click on an option still picks it
 function onFocusOut(e) {
   if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) open.value = false
 }
@@ -62,6 +65,15 @@ function onFocusOut(e) {
       v-if="open"
       class="app-select-list"
     >
+      <!-- no options: one disabled entry says so, nothing to pick -->
+      <button
+        v-if="!options.length"
+        class="app-select-option"
+        disabled
+        type="button"
+      >
+        {{ t('select.empty') }}
+      </button>
       <button
         v-for="opt in options"
         :key="optValue(opt)"

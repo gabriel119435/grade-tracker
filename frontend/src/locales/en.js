@@ -66,6 +66,9 @@ export default {
         no_grades: 'no grades yet',
         load_failed: 'could not load the grades history',
     },
+    select: {
+        empty: 'empty list',
+    },
     date_input: {
         format: 'YYYY-MM-DD',
         invalid: 'invalid date, should be YYYY-MM-DD',

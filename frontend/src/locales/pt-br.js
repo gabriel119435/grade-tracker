@@ -66,6 +66,9 @@ export default {
         no_grades: 'sem notas ainda',
         load_failed: 'não foi possível carregar o histórico',
     },
+    select: {
+        empty: 'lista vazia',
+    },
     date_input: {
         format: 'DD/MM/YYYY',
         invalid: 'data inválida, deve ser DD/MM/YYYY',

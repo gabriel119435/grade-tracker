@@ -45,7 +45,7 @@ each new file builds on what came before, read them in order for the most cohere
     - `AppToast.vue`: renders the toast message with a fade.
     - `LoadError.vue`: failed load message and retry button.
     - `ConfirmButton.vue`: two-click danger button, emits `confirm` on the 2nd click.
-    - `AppSelect.vue`: custom picker, closes on outside click, esc or tab away.
+    - `AppSelect.vue`: custom picker, closes on outside click, esc or tab away, empty list notice.
     - `AppTopBar.vue`: arena, locale picker, tab links slot, username, logout.
     - `UserList.vue`: create form with live checks, list with delete, for teachers or students.
     - `DateInput.vue`: date in the locale format, live validation.
