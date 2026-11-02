@@ -1,6 +1,11 @@
 # general
-.idea
 .DS_Store
+
+# ide
+.idea
+*.sublime-workspace
+*.sublime-project
+pyrightconfig.json
 
 # be auto-generated
 __pycache__/

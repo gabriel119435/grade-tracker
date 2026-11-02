@@ -5,10 +5,10 @@ from app.validation import password_error, username_error
 # values read once from env vars at import. the fallbacks are known weak defaults for local dev only
 # arena name, admin name and admin password are only used on a startup with no arena
 # exception: admin password also builds _DUMMY_HASH in auth.py on every startup
-DEFAULT_ARENA_NAME = os.environ.get("DEFAULT_ARENA_NAME") or "arena de teste"
-DEFAULT_ADMIN_NAME = os.environ.get("DEFAULT_ADMIN_NAME") or "administrador"
-DEFAULT_ADMIN_PASS = os.environ.get("DEFAULT_ADMIN_PASS") or "senha primaria"
-DEFAULT_SEED_PASS = os.environ.get("DEFAULT_SEED_PASS") or "senha secundaria"
+DEFAULT_ARENA_NAME = os.environ.get("DEFAULT_ARENA_NAME") or "arena"
+DEFAULT_ADMIN_NAME = os.environ.get("DEFAULT_ADMIN_NAME") or "admin"
+DEFAULT_ADMIN_PASS = os.environ.get("DEFAULT_ADMIN_PASS") or "admin pass"
+DEFAULT_SEED_PASS = os.environ.get("DEFAULT_SEED_PASS") or "seed pass"
 
 
 def check_settings():
